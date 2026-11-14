@@ -1,54 +1,19 @@
-This is the **fx** asset for TMC's **Dot** collection. It adds visual effects as documents rather than as scattered `instantiate()` calls: pooled, budgeted, quality-tiered, distance-culled, and safe to drop.
+# dot-fx
 
-This collection of assets provides modular building blocks for creating games and applications within the TMC ecosystem, ensuring consistency and interoperability across all `dot-*` assets. This includes core functionality, networking, authentication, cloud integration, and more.
+Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and dot-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source **Dot** collection (MIT licence) and depends only on [dot-core](https://github.com/modcommunity/dot-core).
 
-**These assets are COMPLETELY OPEN SOURCE**. You are free to use, modify, and distribute them under the terms of the MIT license. The only thing not open source is the back-end web infrastructure. So if you opt into using your own authentication backend instead of integrating with TMC, you will need to build and integrate your own back-end infrastructure.
+> Built with Claude Code. Every addon has a headless test suite and the suites pass, but little of this has met real players yet. Please report rough edges.
 
-## From Maintainer & WARNING
-This asset, along with all the others, was built initially with **Claude Code** and will continue to be maintained and extended using it. This is because I (`gamemann`) cannot build the entire TMC platform alone (I wish I could lol).
+## Install
 
-**Please treat this as partially tested.** Every asset has its own headless test suite and those suites pass, but very little of this has been in front of real players yet. Expect rough edges, and please report anything you run into.
+1. Copy `addons/dot_fx/` and dot-core's `addons/dot_core/` into your project.
+2. Enable dot-fx under **Project > Project Settings > Plugins**.
 
-## One invariant, and everything follows from it
+## The one rule
 
-**An effect never changes the simulation.** It is a picture of something that already happened.
+An effect only draws something that already happened. It never deals damage, moves a body or decides a hit. That is why dot-fx may skip an effect when the frame is busy, when the player picked a low quality tier, when the effect is far away, or when its content is still downloading: no two machines disagree about anything that matters. Damage belongs to dot-combat, effects over time to dot-effects, and how it looks to dot-fx.
 
-That single property is what makes every mechanism here safe. A frame budget may drop one, a quality tier may refuse one, a distance cull may skip one, and a client whose content pack is still downloading simply does not see it. In none of those cases do two machines disagree about anything that matters. The moment an effect is allowed to deal damage, move a body or decide a hit, the property is gone and every one of those becomes a desync.
-
-So: dot-combat owns damage, dot-effects owns what happens over time, and this owns what it looks like.
-
-## A low quality tier is missing effects, not running all of them badly
-
-`min_quality` gates whether an effect **exists**, not how detailed it is. Halving the particle count on the effect that is killing the frame does not save the frame; not spawning it does. A "low" tier built the other way is one where everything looks worse and the frame rate is the same.
-
-`frame_budget` is the same idea per frame: a grenade landing in a crowd cannot cost more than one frame has, and what goes is the lowest-priority request: one of higher `priority` takes the room of lower ones started in the same frame (never of an effect already on screen), and a request the budget refuses retires nothing.
-
-## Camera shake is a value, and has to be able to be off
-
-```gdscript
-fx.advance(delta)
-camera.position = base + fx.shake.offset()
-camera.rotation.z = base_roll + fx.shake.roll()
-```
-
-It computes a displacement and touches no camera, which is why one implementation serves a 3D rig, a 2D one, a spectator camera and a headless suite.
-
-Two details that make it read as shake rather than as a fault:
-
-- **Trauma, squared.** A linear falloff stops abruptly, because the last few per cent of a linear ramp is still visible motion. Squared spends most of its time near zero, so it fades.
-- **Sampled noise, not a random number per frame.** Random per frame is jitter at the frame rate, and it looks like a rendering fault, and it looks different at 60 and at 144 fps, where a noise path does not.
-
-And `shake_scale` must be able to reach **zero**. Camera shake is one of the commonest causes of simulator sickness, and a game with no way to turn it off is a game some people cannot play. It is read every frame, so turning it off takes effect immediately rather than at the next map.
-
-## A full-screen flash is a hazard before it is a style
-
-`allow_flashes` is a player-facing off switch and `flashes_per_second` defaults to **three**, which is the published photosensitivity guidance. Both are enforced in the manager rather than left to the caller, because the caller that does not honour them is the next feature somebody adds, and the person it harms has no way to know which effect did it.
-
-## Decals are a ring
-
-An unbounded decal list grows with the **round** rather than with the number of players, which makes it invisible in testing and fatal at minute forty. `max_decals` recycles the oldest, and lowering it takes effect at the next decal or the next `advance`, whichever comes first.
-
-## Using it
+## Quick start
 
 ```gdscript
 var fx := DotFxManager.new()
@@ -57,50 +22,123 @@ fx.world_ref = DotNodeRef.of_path(world.get_path())   # or leave it on the manag
 add_child(fx)
 fx.setup()
 
-fx.viewer_position = camera.global_position     # once a frame; culling needs it
+fx.viewer_position = camera.global_position     # once a frame; distance culling needs it
 fx.spawn(&"muzzle_flash", muzzle.global_transform)
 fx.spawn_decal(&"bullet_hole", hit)
-fx.shake_at(&"grenade", where)                  # scaled by distance
-fx.flash(&"hurt")                               # capped and rate limited
+fx.shake_at(&"grenade", where)                  # stronger when closer
+fx.flash(&"hurt")                               # limited per second
 fx.advance(delta)
 ```
 
-`spawn_2d` is beside `spawn` rather than a widened signature, which is the choice the props and NPC assets made when they grew a second dimension: a caller holding a `Vector2` is a different caller.
+`spawn_2d` is the 2D twin of `spawn`.
 
-## A beacon, for saying where somebody is
+## Settings
 
-`DotFxBeacon` is a ring at a player's feet that sends out a ripple once a period, a column above them that shows through walls, and a ping that comes from where they are. Games use it for an admin's `beacon` and for rules that give the last players of a side away. It is built from shapes in code and makes its own ping, so it needs no art or sound files.
+`DotFxConfig` follows the usual `DotConfig` layering: defaults, then a JSON file, then environment variables (`DOT_FX_*`), then the command line (`--...`).
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `quality` | 3 | Quality tier, 0 to 3. An effect whose `min_quality` is above the tier is not spawned at all. |
+| `frame_budget` | 60 | Most effects started per frame. Higher `priority` effects win; effects already on screen are never removed. 0 = no limit. |
+| `max_decals` | 256 | Decals kept before the oldest is recycled. Raise it for more; 0 keeps none. |
+| `max_instances` | 256 | Effect instances alive at once. Raise it for more. |
+| `penetration_decals` | on | Draw a decal on the exit side of a bullet hole. |
+| `weather_quality` | 2 | 0 off, 1 low (a third of the flakes), 2 high. |
+| `weather_density` | 1.0 | Player density slider, 0 to 2. |
+| `shake_scale` | 1.0 | Camera shake strength. 0 turns shake off, and it takes effect at once. |
+| `allow_flashes` | on | Player-facing switch for full-screen flashes. |
+| `flash_cap` | 0.6 | Strongest flash opacity. |
+| `flashes_per_second` | 3 | Flash rate limit (the common photosensitivity guidance). |
+| `distance_scale` | 1.0 | Multiplies every effect's cull distance. |
+| `cull_behind` | off | Skip effects behind the camera. |
+
+The ranges shown in the editor are slider hints. They are not enforced in code.
+
+### Why it works this way
+
+- **A low tier removes effects instead of degrading them.** Halving the particles on the effect that costs the frame saves little. Not spawning it saves the frame.
+- **Camera shake is a value.** `fx.shake.offset()` and `fx.shake.roll()` return a displacement and touch no camera, so the same shake drives a 3D rig, a 2D camera or a headless test. Strength falls off as trauma squared and uses sampled noise, so it fades smoothly and looks the same at 60 and 144 fps.
+- **Flash limits live in the manager.** A flash that ignores the player's switch can hurt someone who cannot tell which effect did it.
+
+```gdscript
+camera.position = base + fx.shake.offset()
+camera.rotation.z = base_roll + fx.shake.roll()
+```
+
+## Decals and blood
+
+`DotFxDecals` spawns pooled, fading blood splatters from a hit position and normal, and places static wall decals from data. It uses `Decal` nodes where the renderer has them and textured quads under Compatibility and on the web. `DotFxDecalConfig` (`DOT_FX_DECAL_*`, `--decal-*`):
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `gore` | on | Blood on or off. |
+| `quality` | 3 | 0 to 3. |
+| `max_blood` | 96 | Blood splatters kept. |
+| `max_static` | 512 | Placed wall decals kept. |
+| `blood_hold` / `blood_fade` | 20 / 8 | Seconds a splatter stays, then fades. |
+| `blood_size_min` / `blood_size_max` | 0.8 / 1.6 | Splatter size range. |
+| `blood_colour` | `#ffffff` | Blood tint. |
+| `fade_distance` | 60 | Metres at which decals fade out. |
+| `depth` | 0.5 | How deep a decal projects. |
+
+```gdscript
+var decals := DotFxDecals.new()
+add_child(decals)
+decals.apply_config(cfg)
+decals.splatter(hit_position, hit_normal)       # null when gore is off
+decals.place({"image": "alien", "position": [1, 2, 3], "normal": [0, 0, 1], "width": 1.5})
+decals.advance(delta)                           # once a frame
+```
+
+Built-in images: `gib_0` to `gib_20`, `alien`, `warning`, `drip`, `beast`, `spider`, `tentacle`, `robot`.
+
+`DotFxBlood` wraps `DotFxDecals` for games that draw blood: `splat_behind(from, to)`, `splat_below(feet)`, `splat_ray`, `splat_at(point, normal)`, a `mask` for the layers blood may land on, and `follow(settings)` to track the player's `gore` and `fx_quality` settings.
+
+## Muzzle flashes
+
+`DotMuzzleFlash` is a pooled flash. Parent it to a weapon's muzzle point and call `fire()` per shot. The pool is built on the first shot and reused. Nothing is built on a headless server (`DotMuzzleFlash.available()`).
+
+- Size comes from the weapon category: pistol very small, revolver, SMG and carbine small, rifle, LMG and DMR medium, shotgun and sniper big, suppressed none. A weapon profile overrides it with `extra: {muzzle_flash: big}` (`very_small`, `small`, `medium`, `big`, `none`).
+- Set `first_person = true` on a view model's flash so it fades out near the camera.
+
+`DotMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`): `quality` (default 3; 0 off, 1 hard-edged without light, 2 dithered with light, 3 smooth with light), `light_scale` 1.0, `first_person_fade` 0.6 m, `lifetime` 0.05 s, `max_size` 4, `max_distance` 120 m, `light_distance` 30 m.
+
+## Break effects
+
+`DotFxBreak` makes splinters, shards, sparks or chunks and a crack sound when something breaks, by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map names such as `GLASS` or `WOOD_CRATE` map onto them). Connect what breaks (a `DotPropDamage.broken`, a `DotMapGlass.broken`, a `DotMapBreakable` hook) to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set. It uses CPU particles, so it runs in the browser.
+
+`DotFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`): `enabled` on, `scale` 1.0, `max_particles` 64, `max_live` 12, `light_scale` 0.5 (mobile and web), `sounds` on, `volume_db` 0.
+
+## Beacons
+
+`DotFxBeacon` marks where a player is: a ring at their feet that ripples once per period, a column visible through walls, and a ping. It is built in code and needs no art or sound files.
 
 ```gdscript
 var marker := DotFxBeacon.new()
 marker.colour = Color(1.0, 0.6, 0.1)
 marker.period = 1.0
-marker.local_view = is_my_player        # no column in your own eyes
+marker.local_view = is_my_player        # no column in your own view
 add_child(marker)
 
-marker.global_position = drawn_position # once a frame, where the player is drawn
-marker.advance(delta)                   # true on the frame it pings
+marker.global_position = drawn_position
+marker.advance(delta)                   # returns true on the frame it pings
 ```
 
-A game that plays the ping through its own sound catalogue sets `marker.ping_enabled = false` (API level 3, before `add_child` or followed by `build()`): no voice is built, and `advance()` still returns true on each pulse so the game plays its own sound from that. Without it the ping would be heard twice.
+To play the ping through your own sound system, set `marker.ping_enabled = false` before `add_child` (or call `build()` afterwards). `advance()` still returns true on each pulse. `marker.resize(radius, height, base)` changes the size of a running marker.
 
-To change the size of a marker that is already running, call `marker.resize(radius, height, base)` (API level 4); it edits the meshes in place and keeps the phase, where `build()` frees and rebuilds them.
+## Weather
 
-## Weather: snow and rain inside volumes
-
-`DotFxWeather` draws snow or rain around the camera, only inside boxes the document names (or everywhere around the camera when it names none). One `MultiMesh` of quads is placed entirely in a vertex shader, so there are no particle nodes, no per-frame transforms and no collision: a flake outside every volume is collapsed in the shader, which is how nothing falls through a roof. It runs under the Compatibility renderer in the browser.
+`DotFxWeather` draws snow or rain around the camera, inside boxes the map names (or everywhere when it names none). It is one `MultiMesh` moved in a vertex shader, so there are no particle nodes and no collision, and it works under Compatibility in the browser. It is skipped without a display (`DotFxWeather.can_render()` is false on a dedicated server).
 
 ```gdscript
 var w := DotFxWeather.new()
 add_child(w)
-var res := w.apply(map_document["weather"])        # DotResult; a bad document keeps the old weather
-w.quality = DotFxWeather.Quality.HIGH              # OFF, LOW (a third of the flakes), HIGH
-w.density_scale = 1.0                              # a player's slider, 0 to 2
-w.audible_changed.connect(_on_weather_sound)       # (sound id, inside): the game plays its own sound
-w.advance(delta, camera.global_position)           # once a frame
+var res := w.apply(map_document["weather"])   # DotResult; a bad document keeps the old weather
+w.quality = DotFxWeather.Quality.HIGH         # OFF, LOW, HIGH
+w.density_scale = 1.0
+w.audible_changed.connect(_on_weather_sound)  # (sound id, inside)
+w.advance(delta, camera.global_position)
 ```
-
-The document, validated by `DotFxWeatherDef.parse()`:
 
 ```json
 {
@@ -113,53 +151,22 @@ The document, validated by `DotFxWeatherDef.parse()`:
 }
 ```
 
-`kind` is `snow` or `rain` and is the only required key. `volumes` are axis-aligned world-space boxes, as `min`/`max` or `center`/`size`; none means everywhere. Unknown keys are refused so a misspelt `volumes` cannot read as "everywhere". `DotFxConfig.weather_quality` (0, 1, 2) and `weather_density` carry the settings; `apply_config()` reads them. Weather is skipped without a display (`DotFxWeather.can_render()`, false on a dedicated server). More in [docs/weather.md](docs/weather.md); run `examples/weather_demo.tscn`.
+Only `kind` (`snow` or `rain`) is required. `volumes` are world-space boxes given as `min`/`max` or `center`/`size`. Unknown keys are refused. See [docs/weather.md](docs/weather.md).
 
-## Decals
+## Examples
 
-`DotFxDecals` spawns pooled, capped, fading blood splatters from a hit position and normal, and places static wall decals (graffiti) from data. It uses `Decal` nodes where the renderer has them and textured quads just off the surface under Compatibility and the web. `DotFxDecalConfig` carries the gore toggle, quality tier, caps, hold and fade times and blood colour, layered like every `DotConfig` (`DOT_FX_DECAL_*`, `--decal-*`).
-
-```gdscript
-var decals := DotFxDecals.new()
-add_child(decals)
-decals.apply_config(cfg)                                  # DotFxDecalConfig
-decals.splatter(hit_position, hit_normal)                 # null when gore is off
-decals.place({"image": "alien", "position": [1, 2, 3], "normal": [0, 0, 1], "width": 1.5})
-decals.advance(delta)                                     # once a frame
-```
-
-`DotFxBlood` wraps a `DotFxDecals` with what every game that draws blood repeats: `splat_behind(from, to)` (the surface behind a hit), `splat_below(feet)` (the floor under a victim), `splat_ray`, `splat_at(point, normal)` (a server's splat, near the camera and rate-limited), `mask` for the layers it may land on, and `follow(settings)` to track the player's `gore` and `fx_quality`.
-
-Images: `gib_0` to `gib_20` (pixel-art meat chunks), `alien`, `warning`, `drip`, `beast`, `spider`, `tentacle`, `robot`. Run `examples/decals_selftest.tscn` (headless) and `examples/decals_demo.tscn`.
-
-Art credits are in [Credits](#credits).
-
-## Muzzle flashes
-
-`DotMuzzleFlash` is a pooled muzzle flash node: parent it to a weapon's muzzle point (view model or world model) and call `fire()` per shot. Three instances are built on the first shot and reused, so nothing is allocated per shot, and nothing is built at all on a headless server (`DotMuzzleFlash.available()`). `DotMuzzleFlash.size_for(category, extra, suppressed)` picks a size: pistol very small, revolver, SMG and carbine small, rifle, LMG and DMR medium, shotgun and sniper big, suppressed none; a weapon profile overrides it with `extra: {muzzle_flash: big}` (`very_small`, `small`, `medium`, `big`, `none`). Set `first_person = true` on the view model's node: it fades the mesh out within `first_person_fade` metres of the camera so it never fills the view. `DotMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`) has `quality` (0 off, 1 hard-edged no light, 2 dithered with light, 3 smooth with light), `light_scale`, `max_size`. Run `tools/screenshot.sh shots/m.png muzzle`.
-
-## Installing
-
-Copy `addons/dot_fx/` and [`dot-core`](https://github.com/modcommunity/dot-core)'s `addons/dot_core/` into your project and enable dot-fx in **Project → Project Settings → Plugins**.
-
-## Dependencies
-
-[dot-core](https://github.com/modcommunity/dot-core). Nothing else.
-
-## Break effects
-
-`DotFxBreak` makes the splinters, shards, sparks or chunks and the crack sound of something breaking, keyed by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map-material names such as `GLASS` or `WOOD_CRATE` alias onto them). A game adds one node and connects whatever breaks: `dot-props` `DotPropDamage.broken`, a `DotMapGlass` pane's `broken`, or a `DotMapBreakable` effect hook, to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set when it was switched off, headless or over its cap. CPU particles only, so it runs in the browser. `DotFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`) has `enabled`, `scale` (0 to 4), `max_particles`, `max_live`, `light_scale` (applied on mobile and web), `sounds`, `volume_db`. `follow(settings)` tracks the `fx_quality` key. Run `tools/screenshot.sh shots/b.png break`.
+Open these scenes from `examples/`: `weather_demo`, `decals_demo`, `muzzle_demo`, `break_demo`, `goo_demo`, `surface_demo`. The `*_selftest` scenes run headless. `tools/screenshot.sh shots/m.png muzzle` (or `break`) takes a screenshot.
 
 ## Credits
 
-All third-party art and sound is CC0. The full list is in [`art/CREDITS.md`](addons/dot_fx/art/CREDITS.md) and [`art/break_sounds/CREDITS.md`](addons/dot_fx/art/break_sounds/CREDITS.md).
+All third-party art and sound is CC0. Full lists: [art/CREDITS.md](addons/dot_fx/art/CREDITS.md) and [art/break_sounds/CREDITS.md](addons/dot_fx/art/break_sounds/CREDITS.md).
 
 | Asset | Author / source | Licence |
 | --- | --- | --- |
 | Blood splatter (six 256 px frames, `art/blood_splatter.png`) | ExileGL, [OpenGameArt](https://opengameart.org/content/blood-splatter) | CC0 |
 | Graffiti Decals 64x (`art/graffiti.png`) | Mumu, [OpenGameArt](https://opengameart.org/content/graffiti-decals-64x) | CC0 |
 | Splat Pack (16 splats, `art/splat_pack.png`) | Kenney, [OpenGameArt](https://opengameart.org/content/splat-pack) | CC0 |
-| Gore Blood Gibs (21 sprites, `art/gibs.png`, the `gib_N` decal images) | Reactorcore, [OpenGameArt](https://opengameart.org/content/gore-blood-gibs-meat-chunks) | CC0 |
+| Gore Blood Gibs (21 sprites, `art/gibs.png`) | Reactorcore, [OpenGameArt](https://opengameart.org/content/gore-blood-gibs-meat-chunks) | CC0 |
 | Muzzle Flash VFX - Godot 3D (`art/binbun_muzzle/`) | Binbun, [itch.io](https://binbun3d.itch.io/muzzle-flash-vfx) | CC0 |
 | Impact Sounds 1.0 (cut into `art/break_sounds/`) | Kenney, [kenney.nl](https://kenney.nl/assets/impact-sounds) | CC0 |
 
