@@ -132,18 +132,11 @@ decals.advance(delta)                                     # once a frame
 
 Images: `gib_0` to `gib_20` (pixel-art meat chunks), `alien`, `warning`, `drip`, `beast`, `spider`, `tentacle`, `robot`. Run `examples/decals_selftest.tscn` (headless) and `examples/decals_demo.tscn`.
 
-Art, both CC0:
-
-- Blood splatter by ExileGL, https://opengameart.org/content/blood-splatter (CC0), downscaled to six 256 px frames in `art/blood_splatter.png`.
-- Graffiti Decals 64x by Mumu, https://opengameart.org/content/graffiti-decals-64x (CC0), `art/graffiti.png`.
-- Splat Pack by Kenney, https://opengameart.org/content/splat-pack (CC0), 16 splats in `art/splat_pack.png`; `DotFxDecals.splatter` mixes them with the six blood frames unless `extra_blood` is off.
-- Gore Blood Gibs by Reactorcore, https://opengameart.org/content/gore-blood-gibs-meat-chunks (CC0), 21 sprites in `art/gibs.png`, placeable as `gib_N` decal images. Full list: `art/CREDITS.md`.
+Art credits are in [Credits](#credits).
 
 ## Muzzle flashes
 
 `DotMuzzleFlash` is a pooled muzzle flash node: parent it to a weapon's muzzle point (view model or world model) and call `fire()` per shot. Three instances are built on the first shot and reused, so nothing is allocated per shot, and nothing is built at all on a headless server (`DotMuzzleFlash.available()`). `DotMuzzleFlash.size_for(category, extra, suppressed)` picks a size: pistol very small, revolver, SMG and carbine small, rifle, LMG and DMR medium, shotgun and sniper big, suppressed none; a weapon profile overrides it with `extra: {muzzle_flash: big}` (`very_small`, `small`, `medium`, `big`, `none`). Set `first_person = true` on the view model's node: it fades the mesh out within `first_person_fade` metres of the camera so it never fills the view. `DotMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`) has `quality` (0 off, 1 hard-edged no light, 2 dithered with light, 3 smooth with light), `light_scale`, `max_size`. Run `tools/screenshot.sh shots/m.png muzzle`.
-
-Art, CC0: Muzzle Flash VFX - Godot 3D by Binbun, https://binbun3d.itch.io/muzzle-flash-vfx (CC0), vendored in `art/binbun_muzzle/` with the licence statement in `LICENSE.txt`.
 
 ## Installing
 
@@ -157,7 +150,18 @@ Copy `addons/dot_fx/` and [`dot-core`](https://github.com/modcommunity/dot-core)
 
 `DotFxBreak` makes the splinters, shards, sparks or chunks and the crack sound of something breaking, keyed by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map-material names such as `GLASS` or `WOOD_CRATE` alias onto them). A game adds one node and connects whatever breaks: `dot-props` `DotPropDamage.broken`, a `DotMapGlass` pane's `broken`, or a `DotMapBreakable` effect hook, to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set when it was switched off, headless or over its cap. CPU particles only, so it runs in the browser. `DotFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`) has `enabled`, `scale` (0 to 4), `max_particles`, `max_live`, `light_scale` (applied on mobile and web), `sounds`, `volume_db`. `follow(settings)` tracks the `fx_quality` key. Run `tools/screenshot.sh shots/b.png break`.
 
-Sounds, CC0: Impact Sounds 1.0 by Kenney, https://kenney.nl/assets/impact-sounds (CC0), cut into `art/break_sounds/` (see `CREDITS.md` there).
+## Credits
+
+All third-party art and sound is CC0. The full list is in [`art/CREDITS.md`](addons/dot_fx/art/CREDITS.md) and [`art/break_sounds/CREDITS.md`](addons/dot_fx/art/break_sounds/CREDITS.md).
+
+| Asset | Author / source | Licence |
+| --- | --- | --- |
+| Blood splatter (six 256 px frames, `art/blood_splatter.png`) | ExileGL, [OpenGameArt](https://opengameart.org/content/blood-splatter) | CC0 |
+| Graffiti Decals 64x (`art/graffiti.png`) | Mumu, [OpenGameArt](https://opengameart.org/content/graffiti-decals-64x) | CC0 |
+| Splat Pack (16 splats, `art/splat_pack.png`) | Kenney, [OpenGameArt](https://opengameart.org/content/splat-pack) | CC0 |
+| Gore Blood Gibs (21 sprites, `art/gibs.png`, the `gib_N` decal images) | Reactorcore, [OpenGameArt](https://opengameart.org/content/gore-blood-gibs-meat-chunks) | CC0 |
+| Muzzle Flash VFX - Godot 3D (`art/binbun_muzzle/`) | Binbun, [itch.io](https://binbun3d.itch.io/muzzle-flash-vfx) | CC0 |
+| Impact Sounds 1.0 (cut into `art/break_sounds/`) | Kenney, [kenney.nl](https://kenney.nl/assets/impact-sounds) | CC0 |
 
 ## Licence
 
