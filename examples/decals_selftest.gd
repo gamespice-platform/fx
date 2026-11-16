@@ -194,10 +194,10 @@ func _config() -> void:
 	cfg.blood_size_min = 3.0
 	_check(not cfg.validate().ok, "min above max fails validation")
 	_check(cfg.env_prefix() == "DOT_FX_DECAL_" and cfg.cli_prefix() == "--decal-", "environment and command-line prefixes")
-	OS.set_environment("DOT_FX_DECAL_MAX_BLOOD", "33")
+	OS.set_environment("GS_FX_DECAL_MAX_BLOOD", "33")
 	var envd := DotFxDecalConfig.new()
 	envd.apply_env()
-	OS.unset_environment("DOT_FX_DECAL_MAX_BLOOD")
+	OS.unset_environment("GS_FX_DECAL_MAX_BLOOD")
 	_check(envd.max_blood == 33, "the environment overrides")
 	var file := "user://decal_cfg_test.json"
 	var f := FileAccess.open(file, FileAccess.WRITE)
