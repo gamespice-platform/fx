@@ -7,22 +7,7 @@
 [ext_resource type="Texture2D" path="res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/shared/texture/flash_front/flash_front_05.png" id="5_pgeds"]
 [ext_resource type="Shader" path="res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash/shader/glow.gdshader" id="6_63e7o"]
 [ext_resource type="Script" path="res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/shared/script/vfx_light.gd" id="7_5te75"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_kfp4v"]
-noise_type = 2
-frequency = 0.005
-fractal_octaves = 3
-cellular_distance_function = 1
-domain_warp_type = 1
-domain_warp_frequency = 0.005
-domain_warp_fractal_octaves = 2
-domain_warp_fractal_lacunarity = 4.145
-domain_warp_fractal_gain = 1.69
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_mbtpe"]
-noise = SubResource("FastNoiseLite_kfp4v")
-seamless = true
-seamless_blend_skirt = 0.975
+[ext_resource type="Texture2D" path="res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/shared/texture/noise/muzzle_noise_cell_skirt.png" id="noise_cell_skirt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_teexh"]
 render_priority = 0
@@ -30,7 +15,7 @@ shader = ExtResource("2_yxpe6")
 shader_parameter/main_texture = ExtResource("3_1h27b")
 shader_parameter/texture_scale = Vector2(1, 1)
 shader_parameter/alignment = 3
-shader_parameter/noise_texture = SubResource("NoiseTexture2D_mbtpe")
+shader_parameter/noise_texture = ExtResource("noise_cell_skirt")
 shader_parameter/noise_scrolling = Vector2(0, 1)
 shader_parameter/noise_strength = 0.8
 shader_parameter/primary_color = Color(1, 1, 1, 1)

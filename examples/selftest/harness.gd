@@ -78,5 +78,14 @@ func _check(condition: bool, what: String) -> void:
 		_line("  FAIL  %s" % what)
 
 
+## Waits until [param ms] of wall time have passed since [param since_ms] (Time.get_ticks_msec()). A SceneTree timer
+## counts frame deltas, and the first delta after a call that loaded a scene already holds the load, so a timer made
+## right after such a call can time out a frame later; a flash's lifetime is measured in wall time from the shot.
+func _wait_wall_ms(since_ms: int, ms: int) -> void:
+	while Time.get_ticks_msec() - since_ms < ms:
+		await get_tree().process_frame
+	await get_tree().process_frame
+
+
 func _line(text: String) -> void:
 	print(text)

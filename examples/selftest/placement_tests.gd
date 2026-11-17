@@ -249,8 +249,9 @@ func _test_muzzle_flash_lifetime() -> void:
 	f.size = DotMuzzleFlash.Size.SMALL
 	add_child(f)
 	_check(f.fire(), "a forced-available flash fires")
+	var shot := Time.get_ticks_msec()
 	_check(f.is_showing(), "it shows right after the shot")
-	await get_tree().create_timer(0.1).timeout
+	await _wait_wall_ms(shot, 100)
 	_check(not f.is_showing(), "100 ms later it is hidden")
 	f.fire()
 	f.fire()
@@ -271,6 +272,8 @@ func _test_muzzle_flash_lifetime() -> void:
 	remove_child(f)
 	_check(not f.is_showing(), "leaving the tree hides it")
 	f.free()
+	# Let the lights of the shots above run out, so a scene load inside the next fire() cannot expire one mid-check.
+	await _wait_wall_ms(Time.get_ticks_msec(), 100)
 
 	var dark := DotMuzzleFlash.new()
 	dark.size = DotMuzzleFlash.Size.SMALL
@@ -432,6 +435,7 @@ func _test_muzzle_flash_follows() -> void:
 	f.size = DotMuzzleFlash.Size.SMALL
 	muzzle.add_child(f)
 	f.fire()
+	var shot := Time.get_ticks_msec()
 	var shown: Node3D = null
 	for n in f.get_children():
 		if n is Node3D and (n as Node3D).visible:
@@ -439,7 +443,7 @@ func _test_muzzle_flash_follows() -> void:
 	_check(shown != null, "a flash is showing")
 	muzzle.global_position = Vector3(7, 2, -3)
 	_check(shown != null and shown.global_position.distance_to(Vector3(7, 2, -3)) < 0.01, "the weapon moves and the flash is still on its muzzle")
-	await get_tree().create_timer(0.15).timeout
+	await _wait_wall_ms(shot, 150)
 	_check(not f.is_showing(), "and 150 ms after the shot nothing of it is left")
 	muzzle.queue_free()
 	DotMuzzleFlash.force_available = false
@@ -475,6 +479,48 @@ func _test_muzzle_flash_materials_not_shared() -> void:
 	a.queue_free()
 	b.queue_free()
 	DotMuzzleFlash.force_available = false
+
+
+## The flash noise is baked to PNG files (tools/bake_muzzle_noise.gd): a NoiseTexture2D builds its first image on the
+## main thread, and twelve of them made loading the flash scenes one frame of over a second. The bake must stay the
+## exact image the pack's own NoiseTexture2D settings build (seed 0, so the same on every run), with mipmaps as before.
+func _test_muzzle_noise_baked() -> void:
+	_section("muzzle flash noise is baked: no NoiseTexture2D at load, same pixels as the pack's settings")
+	var MuzzleNoise: GDScript = load("res://tools/muzzle_noise.gd")
+	var flash_dir := "res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash"
+	var holders: Array[String] = []
+	_noise_holders(flash_dir, holders)
+	_check(holders.is_empty(), "no muzzle flash scene or material makes a NoiseTexture2D (found: %s)" % [holders])
+	for name: String in MuzzleNoise.NAMES:
+		var png: String = MuzzleNoise.png_path(name)
+		var fresh: Image = await MuzzleNoise.generate(get_tree(), name)
+		var baked := Image.load_from_file(ProjectSettings.globalize_path(png)) if FileAccess.file_exists(png) else null
+		if fresh != null:
+			fresh = fresh.duplicate()
+			fresh.clear_mipmaps()
+		_check(fresh != null and baked != null and baked.get_format() == fresh.get_format()
+			and baked.get_size() == fresh.get_size() and baked.get_data() == fresh.get_data(),
+			"%s matches a fresh NoiseTexture2D pixel for pixel" % png.get_file())
+		var imp := ConfigFile.new()
+		_check(imp.load(png + ".import") == OK and imp.get_value("params", "mipmaps/generate", false) == true
+			and int(imp.get_value("params", "compress/mode", -1)) == 0,
+			"%s imports lossless with mipmaps, as the NoiseTexture2D had them" % png.get_file())
+	var wired := true
+	for i in 6:
+		var mat := load("%s/src/material/muzzle_flash/flash_0%d/flash_0%d_long.tres" % [flash_dir, i + 1, i + 1]) as ShaderMaterial
+		var tex := mat.get_shader_parameter("noise_texture") as Texture2D if mat != null else null
+		var want: String = MuzzleNoise.png_path(["warp", "warp", "warp", "cell", "cell_skirt", "cell_skirt"][i])
+		wired = wired and tex != null and tex.resource_path == want
+	_check(wired, "each long flash material samples the baked noise of its own settings")
+
+
+func _noise_holders(dir: String, out: Array[String]) -> void:
+	for sub in DirAccess.get_directories_at(dir):
+		_noise_holders(dir.path_join(sub), out)
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".tscn") or f.ends_with(".tres"):
+			if FileAccess.get_file_as_string(dir.path_join(f)).contains("NoiseTexture2D"):
+				out.append(f)
 
 
 func _first_vfx(flash: Node) -> Node3D:
