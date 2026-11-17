@@ -20,6 +20,7 @@ var _worst := 0.0
 var _started_at := -1
 var _done := false
 var _done_at := -1
+var _rows: Array[PackedFloat64Array] = []
 
 
 func _initialize() -> void:
@@ -50,8 +51,7 @@ func _process(_delta: float) -> bool:
 		var total := (now - _began) / 1000.0
 		var process := (_pre - _began) / 1000.0 if _pre > _began else -1.0
 		var draw := (_post - _pre) / 1000.0 if _post > _pre and _pre > _began else -1.0
-		print("muzzle_probe frame: %d total_ms=%.1f process_ms=%.1f draw_ms=%.1f call_ms=%.1f" % [
-			_frame - 1, total, process, draw, _call_ms])
+		_rows.append(PackedFloat64Array([_frame - 1, total, process, draw, _call_ms]))
 		if _started_at >= 0 and _frame - 1 >= _started_at:
 			_worst = maxf(_worst, total)
 	_began = now
@@ -61,11 +61,16 @@ func _process(_delta: float) -> bool:
 		if _started_at < 0:
 			_started_at = _frame
 		_step()
-	if _done and _frame >= _done_at + 20:
-		print("muzzle_probe worst: mode=%s worst_ms=%.1f frames=%d total_ms=%.1f" % [
-			_mode, _worst, _done_at - _started_at + 1, 0.0])
-		return true
-	return false
+	return _done and _frame >= _done_at + 20
+
+
+## The report, once the run is over: printing a line per frame inside the frame would be part of what is timed.
+func _finalize() -> void:
+	for row in _rows:
+		print("muzzle_probe frame: %d total_ms=%.1f process_ms=%.1f draw_ms=%.1f call_ms=%.1f" % [
+			int(row[0]), row[1], row[2], row[3], row[4]])
+	print("muzzle_probe worst: mode=%s worst_ms=%.1f frames=%d total_ms=%.1f" % [
+		_mode, _worst, _done_at - _started_at + 1, 0.0])
 
 
 func _step() -> void:
