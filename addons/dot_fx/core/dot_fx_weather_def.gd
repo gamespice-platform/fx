@@ -49,7 +49,7 @@ var wind: Vector3 = Vector3.ZERO
 ## The particle colour; alpha is the peak opacity.
 var colour: Color = Color(1, 1, 1, 1)
 
-## An id the consumer maps to a sound. Empty for none; dot-fx ships no sounds.
+## An id the consumer maps to a sound. Empty for none; GameSpice FX ships no sounds.
 var sound: StringName = &""
 
 

@@ -20,7 +20,7 @@ func _init() -> void:
 	add_child(decals)
 
 
-## Takes the player's `gore` and `fx_quality` from a dot-settings manager (duck-typed: dot-fx does not depend on dot-settings).
+## Takes the player's `gore` and `fx_quality` from a GameSpice Settings manager (duck-typed: GameSpice FX does not depend on GameSpice Settings).
 func apply_settings(store: Object) -> void:
 	var cfg := DotFxDecalConfig.new()
 	if store != null:

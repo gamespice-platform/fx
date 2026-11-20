@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Camera shake as a value. It computes an offset and never touches a camera.
 ##
-## Same rule as dot-spectate's "computes a transform and touches no camera", and for the
+## Same rule as GameSpice Spectate's "computes a transform and touches no camera", and for the
 ## same payoff: one implementation serves a 3D rig, a 2D one, a spectator's camera and a
 ## headless suite, with no second code path and nothing to keep in step.
 ##

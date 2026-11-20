@@ -22,7 +22,7 @@ extends Node
 ## never changes the simulation, so a client over budget, on a low quality tier, too far
 ## away, or still downloading its content, is playing the same game as everybody else. The
 ## moment an effect is allowed to deal damage or move a body, none of this is true — which
-## is why dot-combat owns damage and dot-effects owns what happens over time.
+## is why GameSpice Combat owns damage and GameSpice Effects owns what happens over time.
 
 const SERVICE := &"dot_fx"
 const CHANNEL := "fx"
@@ -66,7 +66,7 @@ var shake: DotFxShake = null
 
 ## The current screen flash colour and strength. A game draws it; this does not.
 ##
-## Same rule as the shake and as dot-spectate's camera: one implementation serves a 3D
+## Same rule as the shake and as GameSpice Spectate's camera: one implementation serves a 3D
 ## game, a 2D one and a headless suite because it produces a number rather than a
 ## [ColorRect].
 var flash_colour: Color = Color(0, 0, 0, 0)
@@ -209,8 +209,8 @@ func warm(ids: Array, at: Transform3D) -> Array[Node]:
 
 ## Spawns at a 2D position, on the XZ plane.
 ##
-## Two entry points rather than one widened signature, which is the choice dot-props and
-## dot-npc made when they grew a second dimension: a caller holding a [Vector2] is a
+## Two entry points rather than one widened signature, which is the choice GameSpice Props and
+## GameSpice NPC made when they grew a second dimension: a caller holding a [Vector2] is a
 ## different caller, and widening the existing signature changes every call site in the
 ## family for the benefit of the new one.
 func spawn_2d(id: StringName, at: Vector2, rotation: float = 0.0) -> Node:
@@ -220,7 +220,7 @@ func spawn_2d(id: StringName, at: Vector2, rotation: float = 0.0) -> Node:
 	return spawn(id, t)
 
 
-## A decal on the entry face and one on the exit face of every wall in [param penetrations] (the entries of dot-combat's `DotShot.penetrations`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
+## A decal on the entry face and one on the exit face of every wall in [param penetrations] (the entries of GameSpice Combat's `DotShot.penetrations`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
 func spawn_penetration_decals(penetrations: Array, id: StringName = &"bullet_hole") -> int:
 	if config == null or not config.penetration_decals:
 		return 0
@@ -237,7 +237,7 @@ func spawn_penetration_decals(penetrations: Array, id: StringName = &"bullet_hol
 	return placed
 
 
-## A bullet mark at each bounce point in [param ricochets] (dot-combat's `DotShot.ricochets`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
+## A bullet mark at each bounce point in [param ricochets] (GameSpice Combat's `DotShot.ricochets`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
 func spawn_ricochet_decals(ricochets: Array, id: StringName = &"bullet_hole") -> int:
 	if config == null or not config.penetration_decals:
 		return 0

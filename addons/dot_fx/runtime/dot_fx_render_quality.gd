@@ -32,7 +32,7 @@ func load_layers(file_path: String = "") -> DotResult:
 	return res
 
 
-## Reads the settings keys `aniso`, `aa`, `mip_bias`, `render_scale` and `sharpness` from a dot-settings manager (duck-typed) and applies them.
+## Reads the settings keys `aniso`, `aa`, `mip_bias`, `render_scale` and `sharpness` from a GameSpice Settings manager (duck-typed) and applies them.
 func apply_settings(store: Object) -> void:
 	if store != null:
 		_cfg.anisotropy = store.get_int(&"aniso", _cfg.anisotropy)

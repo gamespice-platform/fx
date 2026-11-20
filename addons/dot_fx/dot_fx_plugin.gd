@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-## Editor entry point for dot-fx. Registers inspector types only.
+## Editor entry point for GameSpice FX. Registers inspector types only.
 ##
 ## No autoloads: a client drawing effects and a server that has none are two managers in
 ## one process, and a global would make them one.

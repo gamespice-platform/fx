@@ -1,5 +1,5 @@
 extends Node
-## Shared state, helpers and check counters of the dot-fx self-test.
+## Shared state, helpers and check counters of the GameSpice FX self-test.
 
 var _passed := 0
 var _failed := 0

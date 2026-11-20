@@ -27,7 +27,7 @@ A flake is only drawn inside the camera box (28 by 18 by 28 m for snow, 24 by 20
 
 ## Sound
 
-dot-fx ships none. The document's `sound` is an id the game maps to its own sound (a catalogue entry, a stream). `audible_changed(sound, inside)` is emitted when the camera enters or leaves a volume; for a document with no volumes it is emitted once as inside.
+GameSpice FX ships none. The document's `sound` is an id the game maps to its own sound (a catalogue entry, a stream). `audible_changed(sound, inside)` is emitted when the camera enters or leaves a volume; for a document with no volumes it is emitted once as inside.
 
 ## No display
 

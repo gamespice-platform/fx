@@ -41,7 +41,7 @@ func apply_config(cfg: DotFxBreakConfig) -> void:
 		_rng.randomize()
 
 
-## Takes `fx_quality` (0 off) from a dot-settings manager, duck-typed: dot-fx does not depend on it.
+## Takes `fx_quality` (0 off) from a GameSpice Settings manager, duck-typed: GameSpice FX does not depend on it.
 func follow(store: Object) -> void:
 	if store == null:
 		return

@@ -12,8 +12,8 @@ extends Resource
 ## machines disagree about anything that matters.
 ##
 ## The moment an effect is allowed to deal damage, move a body or decide a hit, that
-## property is gone and every one of those mechanisms becomes a desync. dot-combat owns
-## damage; dot-effects owns what happens over time; this owns what it looks like.
+## property is gone and every one of those mechanisms becomes a desync. GameSpice Combat owns
+## damage; GameSpice Effects owns what happens over time; this owns what it looks like.
 
 enum Kind {
 	## A scene instanced at a transform and freed when it is done. Particles, a muzzle
@@ -34,7 +34,7 @@ enum Kind {
 
 ## The scene's path, as a string.
 ##
-## A string rather than a [PackedScene] for the reason dot-props names a prop's script by
+## A string rather than a [PackedScene] for the reason GameSpice Props names a prop's script by
 ## PATH: a game delivered as a content pack is mounted at runtime and **a mounted pack's
 ## `class_name` globals are not registered in the host**, so a catalogue that preloads
 ## cannot describe delivered content — and a catalogue holding loaded scenes cannot be

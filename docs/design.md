@@ -1,4 +1,4 @@
-# dot-fx design
+# GameSpice FX design
 
 Why the addon is shaped the way it is. The one-line rules are in [CLAUDE.md](../CLAUDE.md).
 
@@ -11,7 +11,7 @@ Why the addon is shaped the way it is. The one-line rules are in [CLAUDE.md](../
 - A distance cull may skip it.
 - A client still downloading its content pack never sees it.
 
-In all four cases two machines still agree about everything that matters, so none of them is a desync and none of them needs to be reported as an error. **That is the property that makes this addon cheap**, and it is why the line is drawn where it is: dot-combat owns damage, dot-effects owns what happens over time, dot-fx owns what it looks like. An effect that is allowed to deal damage takes the property away and every mechanism above becomes a bug.
+In all four cases two machines still agree about everything that matters, so none of them is a desync and none of them needs to be reported as an error. **That is the property that makes this addon cheap**, and it is why the line is drawn where it is: GameSpice Combat owns damage, GameSpice Effects owns what happens over time, GameSpice FX owns what it looks like. An effect that is allowed to deal damage takes the property away and every mechanism above becomes a bug.
 
 The suite's budget section says so in its own comment, so that the next person to add a "just this one effect moves the player" feature has to delete the sentence first.
 
@@ -36,7 +36,7 @@ And the three axes are three **different offsets into one noise field**. Samplin
 
 ## A path, not a `PackedScene`
 
-The same reason dot-props names a prop's script by path: a **mounted pack's `class_name` globals are not registered in the host**, so a catalogue that preloads cannot describe delivered content, and one holding loaded scenes cannot be validated on a server with none of them.
+The same reason GameSpice Props names a prop's script by path: a **mounted pack's `class_name` globals are not registered in the host**, so a catalogue that preloads cannot describe delivered content, and one holding loaded scenes cannot be validated on a server with none of them.
 
 ## `advance()` is explicit, not `_process`
 
@@ -44,7 +44,7 @@ A game that pauses, a replay being scrubbed and a suite stepping one frame at a 
 
 ## The instance pool recycles the oldest, and the audio pool does not
 
-Deliberately opposite. An effect's whole value is being seen at the moment it happens, so when `max_instances` is reached the oldest non-decal is taken back and the newest is drawn (decals are bounded separately by `max_decals`, oldest first), and when every live effect is a decal the oldest decal goes: skipping decals outright let a cap full of them refuse every spawn. The budget is asked first, so a request it refuses has recycled nothing. A voice's value is what it is *of*, so dot-audio steals by **priority** and refuses rather than stealing something more important: a gunshot losing to a footstep that started first is that pool's failure mode.
+Deliberately opposite. An effect's whole value is being seen at the moment it happens, so when `max_instances` is reached the oldest non-decal is taken back and the newest is drawn (decals are bounded separately by `max_decals`, oldest first), and when every live effect is a decal the oldest decal goes: skipping decals outright let a cap full of them refuse every spawn. The budget is asked first, so a request it refuses has recycled nothing. A voice's value is what it is *of*, so GameSpice Audio steals by **priority** and refuses rather than stealing something more important: a gunshot losing to a footstep that started first is that pool's failure mode.
 
 ## Refusals carry a reason
 
