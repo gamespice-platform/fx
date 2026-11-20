@@ -241,6 +241,11 @@ func _build_world() -> void:
 	lamp.light_color = Color(1, 0.6, 0.3)
 	lamp.light_energy = 3.0
 	add_child(lamp)
+	_build_props()
+	_build_effects()
+
+
+func _build_props() -> void:
 	# A long checkered floor: aniso, mip bias and AA show on it.
 	var floor_mat := StandardMaterial3D.new()
 	floor_mat.albedo_texture = _checker(512, 16)
@@ -267,6 +272,9 @@ func _build_world() -> void:
 	glow_ball.material_override = glow_mat
 	glow_ball.position = Vector3(2, 1.2, -4)
 	add_child(glow_ball)
+
+
+func _build_effects() -> void:
 	# A character: never culled at the prop distance.
 	var actor := CharacterBody3D.new()
 	actor.position = Vector3(1, 0, -2)

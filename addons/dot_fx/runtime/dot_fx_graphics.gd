@@ -75,6 +75,8 @@ var _store: Object
 var _pending: Array = []
 var _tracked: Array = []
 var _shadow_saved := {}
+# describe()'s dictionary, refilled in place (apply runs from _process under dynamic resolution).
+var _state := {}
 var _camera: Camera3D
 var _dyn_clock := 0.0
 var _brightness_layer: CanvasLayer
@@ -142,13 +144,15 @@ func apply() -> void:
 		dyn_scale = 1.0
 		dyn_prop_share = 1.0
 	_apply_brightness()
-	var alive: Array = []
-	for w in _tracked:
-		var n: Object = w.get_ref()
+	# Backwards and in place: dynamic resolution reaches here from _process, so no new array.
+	var i := _tracked.size() - 1
+	while i >= 0:
+		var n: Object = _tracked[i].get_ref()
 		if n != null and is_instance_valid(n):
-			alive.append(w)
 			_apply_node(n)
-	_tracked = alive
+		else:
+			_tracked.remove_at(i)
+		i -= 1
 	_apply_camera(vp)
 	applied.emit(describe())
 
@@ -431,11 +435,11 @@ func _apply_brightness() -> void:
 		add_child(_brightness_layer)
 	var r := _brightness_layer.get_child(0) as ColorRect
 	(r.material as ShaderMaterial).set_shader_parameter(&"gain", b)
-
+## What is applied, for logs and suites. The same dictionary every call (refilled); duplicate it to keep one.
 
 ## What is applied, for logs and suites.
 func describe() -> Dictionary:
-	var d := {}
+	var d := _state
 	for k in KEYS:
 		d[String(k)] = values[k]
 	d["prop_distance_effective"] = prop_distance()
