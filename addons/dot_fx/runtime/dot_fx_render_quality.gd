@@ -11,6 +11,10 @@ signal applied(state: Dictionary)
 ## The viewport to change; null means the one this node sits in.
 var viewport: Viewport
 
+## The scene-wide half (shadows, distances, LOD, particles, post effects, brightness, dynamic resolution),
+## made by [method follow]; null until then.
+var graphics: DotFxGraphics
+
 var _cfg := DotFxRenderConfig.new()
 var _state := {}
 
@@ -39,8 +43,15 @@ func apply_settings(store: Object) -> void:
 	apply()
 
 
-## Applies the settings now and again whenever one of them changes.
+## Applies the settings now and again whenever one of them changes. Also makes the [DotFxGraphics] child
+## that applies the scene-wide keys ([constant DotFxGraphics.KEYS]) from the same store.
 func follow(store: Object) -> void:
+	if graphics == null:
+		graphics = DotFxGraphics.new()
+		graphics.name = "Graphics"
+		graphics.viewport = viewport
+		add_child(graphics)
+	graphics.follow(store)
 	apply_settings(store)
 	if store != null and not store.changed.is_connected(_on_changed):
 		store.changed.connect(_on_changed.bind(store))
@@ -65,13 +76,18 @@ func apply() -> void:
 	var fxaa := aa == DotFxRenderConfig.Aa.FXAA or aa == DotFxRenderConfig.Aa.TAA_FXAA
 	var taa := aa == DotFxRenderConfig.Aa.TAA or aa == DotFxRenderConfig.Aa.TAA_FXAA
 	vp.anisotropic_filtering_level = _aniso_enum(_cfg.effective_anisotropy())
-	vp.texture_mipmap_bias = _cfg.mip_bias
+	if graphics != null:
+		graphics.base_mip_bias = _cfg.mip_bias
+		graphics.apply_mip_bias(vp)
+	else:
+		vp.texture_mipmap_bias = _cfg.mip_bias
 	vp.msaa_3d = msaa
 	# Compatibility has no screen-space AA or TAA, and the engine warns on every write there.
 	if _has_screen_space_aa():
 		vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
 		vp.use_taa = taa
-	vp.scaling_3d_scale = _cfg.render_scale
+	# Dynamic resolution, when on, keeps lowering from here.
+	vp.scaling_3d_scale = _cfg.render_scale * (graphics.dyn_scale if graphics != null else 1.0)
 	vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if _cfg.render_scale < 0.999 and _has_fsr() else Viewport.SCALING_3D_MODE_BILINEAR
 	vp.fsr_sharpness = _cfg.sharpness
 	_state = {"anisotropy": _cfg.effective_anisotropy(), "aa": aa, "mip_bias": _cfg.mip_bias, "render_scale": _cfg.render_scale}
