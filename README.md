@@ -1,6 +1,6 @@
 [![dot-fx - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/236-dot-fx)
 
-Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and dot-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source **Gamespice** collection (MIT licence) and depends only on [dot-core](https://github.com/gamespice-platform/core).
+Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and dot-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source [**GameSpice**](https://gamespice.net) collection (MIT licence) and depends only on [dot-core](https://github.com/gamespice-platform/core).
 
 > Built with Claude Code. Every addon has a headless test suite and the suites pass, but little of this has met real players yet. Please report rough edges.
 
