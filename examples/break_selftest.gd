@@ -120,7 +120,7 @@ func _config() -> void:
 	_check(not cfg.enabled and cfg.scale == 2.0 and cfg.max_live == 4, "a dictionary sets keys")
 	_check(cfg.effective_scale() == 0.0, "disabled has no effective scale")
 	cfg.enabled = true
-	_check(cfg.env_prefix() == "DOT_FX_BREAK_" and cfg.cli_prefix() == "--break-", "env and cli prefixes")
+	_check(cfg.env_prefix() == "GS_FX_BREAK_" and cfg.cli_prefix() == "--break-", "env and cli prefixes")
 	_check(cfg.validate().ok, "valid")
 	cfg.max_live = -1
 	_check(not cfg.validate().ok, "negative caps are refused")

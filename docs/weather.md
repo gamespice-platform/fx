@@ -1,6 +1,6 @@
 # Weather
 
-`GSFxWeather` is the one thing in dot-fx that is a continuous effect rather than a spawned one. It takes a document ([`GSFxWeatherDef`](../addons/dot_fx/core/dot_fx_weather_def.gd)), the camera's position once a frame, and draws snow or rain around the camera inside the document's volumes.
+`GSFxWeather` is the one thing in gs-fx that is a continuous effect rather than a spawned one. It takes a document ([`GSFxWeatherDef`](../addons/gs_fx/core/gs_fx_weather_def.gd)), the camera's position once a frame, and draws snow or rain around the camera inside the document's volumes.
 
 ## Why a shader and not particles
 

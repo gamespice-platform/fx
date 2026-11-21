@@ -40,7 +40,7 @@ The same reason GameSpice Props names a prop's script by path: a **mounted pack'
 
 ## `advance()` is explicit, not `_process`
 
-A game that pauses, a replay being scrubbed and a suite stepping one frame at a time all need to decide when the frame happens. `_process` decides for them, and dot-audio found the sharp edge of that on its first run: `_process` does not run while the tree is paused, so a manager that only reaps there comes back from a pause menu permanently stuck.
+A game that pauses, a replay being scrubbed and a suite stepping one frame at a time all need to decide when the frame happens. `_process` decides for them, and gs-audio found the sharp edge of that on its first run: `_process` does not run while the tree is paused, so a manager that only reaps there comes back from a pause menu permanently stuck.
 
 ## The instance pool recycles the oldest, and the audio pool does not
 
@@ -56,7 +56,7 @@ Deliberately opposite. An effect's whole value is being seen at the moment it ha
 
 ## Things deliberately not here
 
-- **Any art, any particle, any shader.** dot-ui's rule. A game supplies the scenes; this decides whether, where and how many.
+- **Any art, any particle, any shader.** gs-ui's rule. A game supplies the scenes; this decides whether, where and how many.
 - **A post-processing stack of shipped shaders.** `Kind.SCREEN` produces a colour a game draws. A shipped chromatic-aberration shader would be art with an opinion.
 - **Anything that moves a body or deals damage.** See the invariant.
 - **Effect networking.** A server names an effect id and a place through whatever transport it already has; there is no wire format here, because there is nothing to agree about: every client may legitimately draw a different subset.

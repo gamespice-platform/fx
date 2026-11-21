@@ -1,15 +1,15 @@
 # comments
 # Baselines only shrink: scripts/<gate> --update lowers or drops entries and refuses to add.
-addons/dot_fx/core/dot_fx_config.gd::long_block	7
-addons/dot_fx/core/dot_fx_def.gd::long_block	6
-addons/dot_fx/core/dot_fx_shake.gd::long_block	3
-addons/dot_fx/core/dot_fx_weather_def.gd::long_block	1
-addons/dot_fx/dot_fx_api.gd::long_block	2
-addons/dot_fx/dot_fx_plugin.gd::long_block	1
-addons/dot_fx/runtime/dot_fx_beacon.gd::long_block	3
-addons/dot_fx/runtime/dot_fx_manager.gd::banner	4
-addons/dot_fx/runtime/dot_fx_manager.gd::history	3
-addons/dot_fx/runtime/dot_fx_manager.gd::long_block	9
-addons/dot_fx/runtime/dot_fx_weather.gd::long_block	1
+addons/gs_fx/core/gs_fx_config.gd::long_block	7
+addons/gs_fx/core/gs_fx_def.gd::long_block	6
+addons/gs_fx/core/gs_fx_shake.gd::long_block	3
+addons/gs_fx/core/gs_fx_weather_def.gd::long_block	1
+addons/gs_fx/gs_fx_api.gd::long_block	2
+addons/gs_fx/gs_fx_plugin.gd::long_block	1
+addons/gs_fx/runtime/gs_fx_beacon.gd::long_block	3
+addons/gs_fx/runtime/gs_fx_manager.gd::banner	4
+addons/gs_fx/runtime/gs_fx_manager.gd::history	3
+addons/gs_fx/runtime/gs_fx_manager.gd::long_block	9
+addons/gs_fx/runtime/gs_fx_weather.gd::long_block	1
 examples/fx_selftest.gd::long_block	1
 examples/weather_demo.gd::long_block	1

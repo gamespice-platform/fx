@@ -11,7 +11,7 @@ extends SceneTree
 const MuzzleNoise := preload("res://tools/muzzle_noise.gd")
 
 
-const FLASH := "res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash"
+const FLASH := "res://addons/gs_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash"
 
 
 func _initialize() -> void:

@@ -1,5 +1,5 @@
 extends "res://examples/selftest/placement_tests.gd"
-## Exercises dot-fx with no renderer, which nearly all of it survives.
+## Exercises gs-fx with no renderer, which nearly all of it survives.
 ##
 ## What a headless run can genuinely check is the decision-making: which effects exist at
 ## a quality tier, what the budget refuses, what the distance cull skips, whether the
@@ -21,7 +21,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
-	_line("dot-fx self-test")
+	_line("gs-fx self-test")
 	_line("")
 
 	_test_definitions()

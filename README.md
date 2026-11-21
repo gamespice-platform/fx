@@ -1,17 +1,17 @@
 [![FX - GameSpice addon](docs/banner.png)](https://moddingcommunity.com/a/48-gs-fx)
 
-Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and dot-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source [**GameSpice**](https://gamespice.net) collection (MIT licence) and depends only on [GameSpice Core](https://github.com/gamespice-platform/core).
+Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and gs-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source [**GameSpice**](https://gamespice.net) collection (MIT licence) and depends only on [GameSpice Core](https://github.com/gamespice-platform/core).
 
 > Built with Claude Code. Every addon has a headless test suite and the suites pass, but little of this has met real players yet. Please report rough edges.
 
 ## Install
 
-1. Copy `addons/dot_fx/` and GameSpice Core's `addons/dot_core/` into your project.
-2. Enable dot-fx under **Project > Project Settings > Plugins**.
+1. Copy `addons/gs_fx/` and GameSpice Core's `addons/gs_core/` into your project.
+2. Enable gs-fx under **Project > Project Settings > Plugins**.
 
 ## The one rule
 
-An effect only draws something that already happened. It never deals damage, moves a body or decides a hit. That is why dot-fx may skip an effect when the frame is busy, when the player picked a low quality tier, when the effect is far away, or when its content is still downloading: no two machines disagree about anything that matters. Damage belongs to dot-combat, effects over time to dot-effects, and how it looks to dot-fx.
+An effect only draws something that already happened. It never deals damage, moves a body or decides a hit. That is why gs-fx may skip an effect when the frame is busy, when the player picked a low quality tier, when the effect is far away, or when its content is still downloading: no two machines disagree about anything that matters. Damage belongs to gs-combat, effects over time to gs-effects, and how it looks to gs-fx.
 
 ## Quick start
 
@@ -34,7 +34,7 @@ fx.advance(delta)
 
 ## Settings
 
-`GSFxConfig` follows the usual `GSConfig` layering: defaults, then a JSON file, then environment variables (`DOT_FX_*`), then the command line (`--...`).
+`GSFxConfig` follows the usual `GSConfig` layering: defaults, then a JSON file, then environment variables (`GS_FX_*`), then the command line (`--...`).
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ camera.rotation.z = base_roll + fx.shake.roll()
 
 ## Decals and blood
 
-`GSFxDecals` spawns pooled, fading blood splatters from a hit position and normal, and places static wall decals from data. It uses `Decal` nodes where the renderer has them and textured quads under Compatibility and on the web. `GSFxDecalConfig` (`DOT_FX_DECAL_*`, `--decal-*`):
+`GSFxDecals` spawns pooled, fading blood splatters from a hit position and normal, and places static wall decals from data. It uses `Decal` nodes where the renderer has them and textured quads under Compatibility and on the web. `GSFxDecalConfig` (`GS_FX_DECAL_*`, `--decal-*`):
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -101,13 +101,13 @@ Built-in images: `gib_0` to `gib_20`, `alien`, `warning`, `drip`, `beast`, `spid
 - Size comes from the weapon category: pistol very small, revolver, SMG and carbine small, rifle, LMG and DMR medium, shotgun and sniper big, suppressed none. A weapon profile overrides it with `extra: {muzzle_flash: big}` (`very_small`, `small`, `medium`, `big`, `none`).
 - Set `first_person = true` on a view model's flash so it fades out near the camera.
 
-`GSMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`): `quality` (default 3; 0 off, 1 hard-edged without light, 2 dithered with light, 3 smooth with light), `light_scale` 1.0, `first_person_fade` 0.6 m, `lifetime` 0.05 s, `max_size` 4, `max_distance` 120 m, `light_distance` 30 m.
+`GSMuzzleFlashConfig` (`GS_MUZZLE_*`, `--muzzle-*`): `quality` (default 3; 0 off, 1 hard-edged without light, 2 dithered with light, 3 smooth with light), `light_scale` 1.0, `first_person_fade` 0.6 m, `lifetime` 0.05 s, `max_size` 4, `max_distance` 120 m, `light_distance` 30 m.
 
 ## Break effects
 
 `GSFxBreak` makes splinters, shards, sparks or chunks and a crack sound when something breaks, by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map names such as `GLASS` or `WOOD_CRATE` map onto them). Connect what breaks (a `GSPropDamage.broken`, a `GSMapGlass.broken`, a `GSMapBreakable` hook) to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set. It uses CPU particles, so it runs in the browser.
 
-`GSFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`): `enabled` on, `scale` 1.0, `max_particles` 64, `max_live` 12, `light_scale` 0.5 (mobile and web), `sounds` on, `volume_db` 0.
+`GSFxBreakConfig` (`GS_FX_BREAK_*`, `--break-*`): `enabled` on, `scale` 1.0, `max_particles` 64, `max_live` 12, `light_scale` 0.5 (mobile and web), `sounds` on, `volume_db` 0.
 
 ## Beacons
 
@@ -159,7 +159,7 @@ Open these scenes from `examples/`: `weather_demo`, `decals_demo`, `muzzle_demo`
 
 ## Credits
 
-All third-party art and sound is CC0. Full lists: [art/CREDITS.md](addons/dot_fx/art/CREDITS.md) and [art/break_sounds/CREDITS.md](addons/dot_fx/art/break_sounds/CREDITS.md).
+All third-party art and sound is CC0. Full lists: [art/CREDITS.md](addons/gs_fx/art/CREDITS.md) and [art/break_sounds/CREDITS.md](addons/gs_fx/art/break_sounds/CREDITS.md).
 
 | Asset | Author / source | Licence |
 | --- | --- | --- |

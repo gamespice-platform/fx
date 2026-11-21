@@ -7,7 +7,7 @@ extends RefCounted
 ## big_flash_05, 06. Every one is cellular noise (seed 0) at 512x512, seamless, normalized, with mipmaps.
 
 const NAMES: Array[String] = ["warp", "cell", "cell_skirt"]
-const DIR := "res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/shared/texture/noise"
+const DIR := "res://addons/gs_fx/art/binbun_muzzle/BinbunVFX/shared/texture/noise"
 
 
 static func png_path(name: String) -> String:

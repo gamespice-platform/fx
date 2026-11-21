@@ -60,10 +60,10 @@ func _art() -> void:
 	_check(gibs, "all 21 gib sprites load, cropped to their pixels")
 	_check(GSFxDecalSheet.gib(21) == null and GSFxDecalSheet.decal_image(&"gib_3") != null, "gib_N names resolve, out of range is null")
 	_check(GSFxDecalSheet.decal_image(&"gib_x") == null, "a malformed gib name is null")
-	var credits := FileAccess.get_file_as_string("res://addons/dot_fx/art/CREDITS.md")
+	var credits := FileAccess.get_file_as_string("res://addons/gs_fx/art/CREDITS.md")
 	_check(credits.contains("splat_pack.png") and credits.contains("gibs.png"), "CREDITS.md names every vendored sheet")
 	for f in ["blood_splatter.png", "graffiti.png", "splat_pack.png", "gibs.png"]:
-		_check(FileAccess.file_exists("res://addons/dot_fx/art/" + f), "art file present: " + f)
+		_check(FileAccess.file_exists("res://addons/gs_fx/art/" + f), "art file present: " + f)
 
 
 func _blood() -> void:
@@ -193,7 +193,7 @@ func _config() -> void:
 	cfg.blood_colour = "#40ff40"
 	cfg.blood_size_min = 3.0
 	_check(not cfg.validate().ok, "min above max fails validation")
-	_check(cfg.env_prefix() == "DOT_FX_DECAL_" and cfg.cli_prefix() == "--decal-", "environment and command-line prefixes")
+	_check(cfg.env_prefix() == "GS_FX_DECAL_" and cfg.cli_prefix() == "--decal-", "environment and command-line prefixes")
 	OS.set_environment("GS_FX_DECAL_MAX_BLOOD", "33")
 	var envd := GSFxDecalConfig.new()
 	envd.apply_env()

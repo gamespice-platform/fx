@@ -487,7 +487,7 @@ func _test_muzzle_flash_materials_not_shared() -> void:
 func _test_muzzle_noise_baked() -> void:
 	_section("muzzle flash noise is baked: no NoiseTexture2D at load, same pixels as the pack's settings")
 	var MuzzleNoise: GDScript = load("res://tools/muzzle_noise.gd")
-	var flash_dir := "res://addons/dot_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash"
+	var flash_dir := "res://addons/gs_fx/art/binbun_muzzle/BinbunVFX/muzzle_flash"
 	var holders: Array[String] = []
 	_noise_holders(flash_dir, holders)
 	_check(holders.is_empty(), "no muzzle flash scene or material makes a NoiseTexture2D (found: %s)" % [holders])
