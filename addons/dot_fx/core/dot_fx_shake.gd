@@ -1,4 +1,4 @@
-class_name DotFxShake
+class_name GSFxShake
 extends RefCounted
 
 ## Camera shake as a value. It computes an offset and never touches a camera.
@@ -47,7 +47,7 @@ var exponent: float = 2.0
 ##
 ## [b]Not a nicety.[/b] Camera shake is one of the two or three commonest causes of
 ## simulator sickness, and a game with no way to turn it off is a game some people cannot
-## play at all. It is a settings entry in [DotFxConfig] for that reason and the manager
+## play at all. It is a settings entry in [GSFxConfig] for that reason and the manager
 ## reads it on every frame rather than at start-up, so turning it off takes effect
 ## immediately rather than at the next map.
 var scale: float = 1.0

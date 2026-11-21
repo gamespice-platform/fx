@@ -1,6 +1,6 @@
 extends Node
 
-## Headless checks for [DotFxDecals]: counts, pool cap, fade, switches, placed documents, config layering.
+## Headless checks for [GSFxDecals]: counts, pool cap, fade, switches, placed documents, config layering.
 ## Looks are checked with decals_demo.tscn.
 
 const SECTIONS := 7
@@ -12,7 +12,7 @@ var _section_count := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_art()
 	_blood()
 	_fade()
@@ -29,10 +29,10 @@ func _ready() -> void:
 	get_tree().quit(1 if _failed > 0 else 0)
 
 
-func _make(cfg: DotFxDecalConfig = null) -> DotFxDecals:
-	var d := DotFxDecals.new()
+func _make(cfg: GSFxDecalConfig = null) -> GSFxDecals:
+	var d := GSFxDecals.new()
 	add_child(d)
-	var c := cfg if cfg != null else DotFxDecalConfig.new()
+	var c := cfg if cfg != null else GSFxDecalConfig.new()
 	c.seed_value = 7
 	d.apply_config(c)
 	return d
@@ -40,26 +40,26 @@ func _make(cfg: DotFxDecalConfig = null) -> DotFxDecals:
 
 func _art() -> void:
 	_section("The vendored art slices into textures")
-	var frames := DotFxDecalSheet.blood_frames()
-	_check(frames.size() == DotFxDecalSheet.BLOOD_FRAMES, "six blood frames")
+	var frames := GSFxDecalSheet.blood_frames()
+	_check(frames.size() == GSFxDecalSheet.BLOOD_FRAMES, "six blood frames")
 	_check(frames[0].get_width() == frames[0].get_height() and frames[0].get_width() == 256, "frames are 256 square")
-	var names := DotFxDecalSheet.graffiti_names()
+	var names := GSFxDecalSheet.graffiti_names()
 	_check(names.size() == 7, "seven graffiti images")
 	var all := true
 	for n in names:
-		var t := DotFxDecalSheet.graffiti(n)
-		all = all and t != null and t.get_width() == DotFxDecalSheet.GRAFFITI[n].size.x
+		var t := GSFxDecalSheet.graffiti(n)
+		all = all and t != null and t.get_width() == GSFxDecalSheet.GRAFFITI[n].size.x
 	_check(all, "each graffiti texture has its rectangle's width")
-	_check(DotFxDecalSheet.graffiti(&"nope") == null, "an unknown name is null")
-	var splats := DotFxDecalSheet.splat_frames()
-	_check(splats.size() == DotFxDecalSheet.SPLAT_FRAMES and splats[0].get_width() == 128, "splat pack: 16 frames of 128")
+	_check(GSFxDecalSheet.graffiti(&"nope") == null, "an unknown name is null")
+	var splats := GSFxDecalSheet.splat_frames()
+	_check(splats.size() == GSFxDecalSheet.SPLAT_FRAMES and splats[0].get_width() == 128, "splat pack: 16 frames of 128")
 	var gibs := true
-	for i in range(DotFxDecalSheet.GIB_COUNT):
-		var g := DotFxDecalSheet.gib(i)
-		gibs = gibs and g != null and g.get_width() > 0 and g.get_width() <= DotFxDecalSheet.GIB_CELL
+	for i in range(GSFxDecalSheet.GIB_COUNT):
+		var g := GSFxDecalSheet.gib(i)
+		gibs = gibs and g != null and g.get_width() > 0 and g.get_width() <= GSFxDecalSheet.GIB_CELL
 	_check(gibs, "all 21 gib sprites load, cropped to their pixels")
-	_check(DotFxDecalSheet.gib(21) == null and DotFxDecalSheet.decal_image(&"gib_3") != null, "gib_N names resolve, out of range is null")
-	_check(DotFxDecalSheet.decal_image(&"gib_x") == null, "a malformed gib name is null")
+	_check(GSFxDecalSheet.gib(21) == null and GSFxDecalSheet.decal_image(&"gib_3") != null, "gib_N names resolve, out of range is null")
+	_check(GSFxDecalSheet.decal_image(&"gib_x") == null, "a malformed gib name is null")
 	var credits := FileAccess.get_file_as_string("res://addons/dot_fx/art/CREDITS.md")
 	_check(credits.contains("splat_pack.png") and credits.contains("gibs.png"), "CREDITS.md names every vendored sheet")
 	for f in ["blood_splatter.png", "graffiti.png", "splat_pack.png", "gibs.png"]:
@@ -68,7 +68,7 @@ func _art() -> void:
 
 func _blood() -> void:
 	_section("Blood is pooled and capped, the oldest recycled")
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	cfg.max_blood = 5
 	var d := _make(cfg)
 	var first := d.splatter(Vector3(0, 0, 0), Vector3.UP)
@@ -95,7 +95,7 @@ func _blood() -> void:
 
 func _fade() -> void:
 	_section("Blood holds, fades, then returns to the pool")
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	cfg.blood_hold = 10.0
 	cfg.blood_fade = 4.0
 	var d := _make(cfg)
@@ -116,7 +116,7 @@ func _fade() -> void:
 
 func _switches() -> void:
 	_section("Gore, quality and mode switches")
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	cfg.max_blood = 40
 	var d := _make(cfg)
 	for i in range(30):
@@ -135,13 +135,13 @@ func _switches() -> void:
 	cfg.gore = true
 	d.apply_config(cfg)
 	_check(d.splatter(Vector3.ZERO, Vector3.UP) != null, "gore on again spawns")
-	cfg.mode = DotFxDecalConfig.Mode.MESH
+	cfg.mode = GSFxDecalConfig.Mode.MESH
 	var m := _make(cfg)
 	_check(not m.uses_decal_nodes() and m.splatter(Vector3.ZERO, Vector3.UP) is MeshInstance3D, "mesh mode builds quads")
-	cfg.mode = DotFxDecalConfig.Mode.DECAL
+	cfg.mode = GSFxDecalConfig.Mode.DECAL
 	var dd := _make(cfg)
 	_check(dd.uses_decal_nodes() and dd.splatter(Vector3.ZERO, Vector3.UP) is Decal, "decal mode builds Decal nodes")
-	var q := _make(DotFxDecalConfig.new())
+	var q := _make(GSFxDecalConfig.new())
 	q.config.quality = 0
 	q.apply_config(q.config)
 	var r := q.place({"image": "alien", "position": [0, 0, 0]})
@@ -152,26 +152,26 @@ func _switches() -> void:
 
 func _placed() -> void:
 	_section("Static decals come from data")
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	cfg.max_static = 3
 	var d := _make(cfg)
 	var r := d.place({"id": "a", "image": "alien", "position": [1, 2, 3], "normal": [0, 0, 1], "width": 2.0})
 	_check(r.ok and d.static_count() == 1, "a good document places one")
 	var node: Node3D = r.value
 	_check(node.position.distance_to(Vector3(1, 2, 3)) < 0.05, "at its position")
-	var tex := DotFxDecalSheet.graffiti(&"alien")
+	var tex := GSFxDecalSheet.graffiti(&"alien")
 	var expect_h := 2.0 * tex.get_height() / tex.get_width()
 	var h: float = (node as Decal).size.z if node is Decal else ((node as MeshInstance3D).mesh as QuadMesh).size.y
 	_check(is_equal_approx(h, expect_h), "height follows the image's aspect")
-	_check(d.place({"id": "a", "image": "beast", "position": [0, 0, 0]}).code() == DotError.CODE_CONFLICT, "a duplicate id is refused")
-	_check(d.place({"image": "zzz", "position": [0, 0, 0]}).code() == DotError.CODE_INVALID, "an unknown image is refused")
-	_check(d.place({"image": "alien", "position": [0, 0]}).code() == DotError.CODE_INVALID, "a short position is refused")
-	_check(d.place({"image": "alien", "position": [0, 0, 0], "normals": [0, 0, 1]}).code() == DotError.CODE_INVALID, "a misspelt key is refused")
-	_check(d.place({"image": "alien", "position": [0, 0, 0], "width": 0}).code() == DotError.CODE_INVALID, "a zero width is refused")
+	_check(d.place({"id": "a", "image": "beast", "position": [0, 0, 0]}).code() == GSError.CODE_CONFLICT, "a duplicate id is refused")
+	_check(d.place({"image": "zzz", "position": [0, 0, 0]}).code() == GSError.CODE_INVALID, "an unknown image is refused")
+	_check(d.place({"image": "alien", "position": [0, 0]}).code() == GSError.CODE_INVALID, "a short position is refused")
+	_check(d.place({"image": "alien", "position": [0, 0, 0], "normals": [0, 0, 1]}).code() == GSError.CODE_INVALID, "a misspelt key is refused")
+	_check(d.place({"image": "alien", "position": [0, 0, 0], "width": 0}).code() == GSError.CODE_INVALID, "a zero width is refused")
 	_check(d.static_count() == 1, "none of the bad ones was placed")
 	var batch := d.place_all([{"image": "spider", "position": [0, 0, 0]}, {"image": "robot", "position": [1, 0, 0]}])
 	_check(batch.ok and batch.value == 2 and d.static_count() == 3, "place_all places a list")
-	_check(d.place({"image": "beast", "position": [0, 0, 0]}).code() == DotError.CODE_STATE, "past max_static is refused")
+	_check(d.place({"image": "beast", "position": [0, 0, 0]}).code() == GSError.CODE_STATE, "past max_static is refused")
 	_check(d.remove(&"a") and not d.remove(&"a") and d.static_count() == 2, "remove frees a slot, once")
 	var before := d.static_count()
 	var bad := d.place_all([{"image": "robot", "position": [0, 0, 0]}, {"image": "nope", "position": [0, 0, 0]}])
@@ -182,8 +182,8 @@ func _placed() -> void:
 
 
 func _config() -> void:
-	_section("The config layers like every DotConfig")
-	var cfg := DotFxDecalConfig.new()
+	_section("The config layers like every GSConfig")
+	var cfg := GSFxDecalConfig.new()
 	_check(cfg.gore and cfg.quality == 3 and cfg.max_blood == 96, "defaults")
 	var unknown := cfg.apply_dictionary({"max_blood": 12, "gore": "false", "blood_hold": 3, "blood_colour": "#40ff40"}, "test")
 	_check(cfg.max_blood == 12 and not cfg.gore and is_equal_approx(cfg.blood_hold, 3.0), "a dictionary overrides the defaults")
@@ -195,7 +195,7 @@ func _config() -> void:
 	_check(not cfg.validate().ok, "min above max fails validation")
 	_check(cfg.env_prefix() == "DOT_FX_DECAL_" and cfg.cli_prefix() == "--decal-", "environment and command-line prefixes")
 	OS.set_environment("GS_FX_DECAL_MAX_BLOOD", "33")
-	var envd := DotFxDecalConfig.new()
+	var envd := GSFxDecalConfig.new()
 	envd.apply_env()
 	OS.unset_environment("GS_FX_DECAL_MAX_BLOOD")
 	_check(envd.max_blood == 33, "the environment overrides")
@@ -203,7 +203,7 @@ func _config() -> void:
 	var f := FileAccess.open(file, FileAccess.WRITE)
 	f.store_string('{"quality": 1, "max_blood": 40}')
 	f.close()
-	var fd := DotFxDecalConfig.new()
+	var fd := GSFxDecalConfig.new()
 	_check(fd.apply_json_file(file).ok and fd.quality == 1 and fd.max_blood == 40, "a JSON file overrides")
 	_check(fd.effective_blood_cap() == 10, "the effective cap is a quarter of 40 at quality 1")
 	var d := _make(fd)
@@ -223,7 +223,7 @@ func _config() -> void:
 
 
 func _blood_node() -> void:
-	_section("DotFxBlood casts to the surface behind a hit and under a victim")
+	_section("GSFxBlood casts to the surface behind a hit and under a victim")
 	var floor_body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
 	var box := BoxShape3D.new()
@@ -232,7 +232,7 @@ func _blood_node() -> void:
 	floor_body.add_child(shape)
 	add_child(floor_body)
 	floor_body.global_position = Vector3(0, -0.5, 0)
-	var b := DotFxBlood.new()
+	var b := GSFxBlood.new()
 	add_child(b)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -252,7 +252,7 @@ func _blood_node() -> void:
 	for i in 40:
 		if b.splat_at(Vector3(i * 0.1, 0, 0), Vector3.UP) != null:
 			drawn += 1
-	_check(drawn == DotFxBlood.SPLATS_PER_SECOND, "server splats are limited per second (%d)" % drawn)
+	_check(drawn == GSFxBlood.SPLATS_PER_SECOND, "server splats are limited per second (%d)" % drawn)
 	_check(b.splat_at(Vector3(500, 0, 0), Vector3.UP, 60.0) == null, "and none far from the camera")
 	b.decals.config.gore = false
 	_check(b.splat_below(Vector3.ZERO) == null, "gore off draws none")

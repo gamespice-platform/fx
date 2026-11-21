@@ -2,25 +2,25 @@ extends Node
 
 const SECTIONS := 1
 const CHECKS := 8
-## DotFxSoftSprite: the particle sprite is a smooth disc, filtered linearly.
+## GSFxSoftSprite: the particle sprite is a smooth disc, filtered linearly.
 
 
 func _ready() -> void:
 	var failed := 0
-	var tex := DotFxSoftSprite.texture()
+	var tex := GSFxSoftSprite.texture()
 	var img := tex.get_image()
-	var centre := img.get_pixel(DotFxSoftSprite.SIZE / 2, DotFxSoftSprite.SIZE / 2).a
-	var edge := img.get_pixel(0, DotFxSoftSprite.SIZE / 2).a
-	var quarter := img.get_pixel(DotFxSoftSprite.SIZE / 4, DotFxSoftSprite.SIZE / 2).a
+	var centre := img.get_pixel(GSFxSoftSprite.SIZE / 2, GSFxSoftSprite.SIZE / 2).a
+	var edge := img.get_pixel(0, GSFxSoftSprite.SIZE / 2).a
+	var quarter := img.get_pixel(GSFxSoftSprite.SIZE / 4, GSFxSoftSprite.SIZE / 2).a
 	var checks := [
 		[centre > 0.95, "the sprite is opaque at its centre (%.2f)" % centre],
 		[edge < 0.05, "and clear at its rim (%.2f)" % edge],
 		[quarter > 0.2 and quarter < 0.8, "and soft between, not a hard-edged square (%.2f)" % quarter],
-		[DotFxSoftSprite.texture() == tex, "one shared texture"],
-		[DotFxSoftSprite.material(Color.ORANGE).texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR, "the material filters linearly"],
-		[DotFxSoftSprite.material(Color.ORANGE).albedo_texture == tex, "and samples the soft sprite"],
-		[DotFxSoftSprite.material(Color.ORANGE).blend_mode == BaseMaterial3D.BLEND_MODE_ADD, "fire blends additively"],
-		[DotFxSoftSprite.material(Color.GRAY, false).blend_mode == BaseMaterial3D.BLEND_MODE_MIX, "smoke blends by alpha"],
+		[GSFxSoftSprite.texture() == tex, "one shared texture"],
+		[GSFxSoftSprite.material(Color.ORANGE).texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR, "the material filters linearly"],
+		[GSFxSoftSprite.material(Color.ORANGE).albedo_texture == tex, "and samples the soft sprite"],
+		[GSFxSoftSprite.material(Color.ORANGE).blend_mode == BaseMaterial3D.BLEND_MODE_ADD, "fire blends additively"],
+		[GSFxSoftSprite.material(Color.GRAY, false).blend_mode == BaseMaterial3D.BLEND_MODE_MIX, "smoke blends by alpha"],
 	]
 	for c in checks:
 		if not c[0]:

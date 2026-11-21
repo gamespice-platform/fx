@@ -16,9 +16,9 @@ An effect only draws something that already happened. It never deals damage, mov
 ## Quick start
 
 ```gdscript
-var fx := DotFxManager.new()
+var fx := GSFxManager.new()
 fx.catalogue = my_catalogue
-fx.world_ref = DotNodeRef.of_path(world.get_path())   # or leave it on the manager
+fx.world_ref = GSNodeRef.of_path(world.get_path())   # or leave it on the manager
 add_child(fx)
 fx.setup()
 
@@ -34,7 +34,7 @@ fx.advance(delta)
 
 ## Settings
 
-`DotFxConfig` follows the usual `DotConfig` layering: defaults, then a JSON file, then environment variables (`DOT_FX_*`), then the command line (`--...`).
+`GSFxConfig` follows the usual `GSConfig` layering: defaults, then a JSON file, then environment variables (`DOT_FX_*`), then the command line (`--...`).
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ camera.rotation.z = base_roll + fx.shake.roll()
 
 ## Decals and blood
 
-`DotFxDecals` spawns pooled, fading blood splatters from a hit position and normal, and places static wall decals from data. It uses `Decal` nodes where the renderer has them and textured quads under Compatibility and on the web. `DotFxDecalConfig` (`DOT_FX_DECAL_*`, `--decal-*`):
+`GSFxDecals` spawns pooled, fading blood splatters from a hit position and normal, and places static wall decals from data. It uses `Decal` nodes where the renderer has them and textured quads under Compatibility and on the web. `GSFxDecalConfig` (`DOT_FX_DECAL_*`, `--decal-*`):
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -82,7 +82,7 @@ camera.rotation.z = base_roll + fx.shake.roll()
 | `depth` | 0.5 | How deep a decal projects. |
 
 ```gdscript
-var decals := DotFxDecals.new()
+var decals := GSFxDecals.new()
 add_child(decals)
 decals.apply_config(cfg)
 decals.splatter(hit_position, hit_normal)       # null when gore is off
@@ -92,29 +92,29 @@ decals.advance(delta)                           # once a frame
 
 Built-in images: `gib_0` to `gib_20`, `alien`, `warning`, `drip`, `beast`, `spider`, `tentacle`, `robot`.
 
-`DotFxBlood` wraps `DotFxDecals` for games that draw blood: `splat_behind(from, to)`, `splat_below(feet)`, `splat_ray`, `splat_at(point, normal)`, a `mask` for the layers blood may land on, and `follow(settings)` to track the player's `gore` and `fx_quality` settings.
+`GSFxBlood` wraps `GSFxDecals` for games that draw blood: `splat_behind(from, to)`, `splat_below(feet)`, `splat_ray`, `splat_at(point, normal)`, a `mask` for the layers blood may land on, and `follow(settings)` to track the player's `gore` and `fx_quality` settings.
 
 ## Muzzle flashes
 
-`DotMuzzleFlash` is a pooled flash. Parent it to a weapon's muzzle point and call `fire()` per shot. The pool is built on the first shot and reused. Nothing is built on a headless server (`DotMuzzleFlash.available()`).
+`GSMuzzleFlash` is a pooled flash. Parent it to a weapon's muzzle point and call `fire()` per shot. The pool is built on the first shot and reused. Nothing is built on a headless server (`GSMuzzleFlash.available()`).
 
 - Size comes from the weapon category: pistol very small, revolver, SMG and carbine small, rifle, LMG and DMR medium, shotgun and sniper big, suppressed none. A weapon profile overrides it with `extra: {muzzle_flash: big}` (`very_small`, `small`, `medium`, `big`, `none`).
 - Set `first_person = true` on a view model's flash so it fades out near the camera.
 
-`DotMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`): `quality` (default 3; 0 off, 1 hard-edged without light, 2 dithered with light, 3 smooth with light), `light_scale` 1.0, `first_person_fade` 0.6 m, `lifetime` 0.05 s, `max_size` 4, `max_distance` 120 m, `light_distance` 30 m.
+`GSMuzzleFlashConfig` (`DOT_MUZZLE_*`, `--muzzle-*`): `quality` (default 3; 0 off, 1 hard-edged without light, 2 dithered with light, 3 smooth with light), `light_scale` 1.0, `first_person_fade` 0.6 m, `lifetime` 0.05 s, `max_size` 4, `max_distance` 120 m, `light_distance` 30 m.
 
 ## Break effects
 
-`DotFxBreak` makes splinters, shards, sparks or chunks and a crack sound when something breaks, by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map names such as `GLASS` or `WOOD_CRATE` map onto them). Connect what breaks (a `DotPropDamage.broken`, a `DotMapGlass.broken`, a `DotMapBreakable` hook) to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set. It uses CPU particles, so it runs in the browser.
+`GSFxBreak` makes splinters, shards, sparks or chunks and a crack sound when something breaks, by material: `glass`, `wood`, `metal`, `stone`, `plastic` (map names such as `GLASS` or `WOOD_CRATE` map onto them). Connect what breaks (a `GSPropDamage.broken`, a `GSMapGlass.broken`, a `GSMapBreakable` hook) to `burst(material, at, normal, size)`. It returns the effect, or null with `last_refusal` set. It uses CPU particles, so it runs in the browser.
 
-`DotFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`): `enabled` on, `scale` 1.0, `max_particles` 64, `max_live` 12, `light_scale` 0.5 (mobile and web), `sounds` on, `volume_db` 0.
+`GSFxBreakConfig` (`DOT_FX_BREAK_*`, `--break-*`): `enabled` on, `scale` 1.0, `max_particles` 64, `max_live` 12, `light_scale` 0.5 (mobile and web), `sounds` on, `volume_db` 0.
 
 ## Beacons
 
-`DotFxBeacon` marks where a player is: a ring at their feet that ripples once per period, a column visible through walls, and a ping. It is built in code and needs no art or sound files.
+`GSFxBeacon` marks where a player is: a ring at their feet that ripples once per period, a column visible through walls, and a ping. It is built in code and needs no art or sound files.
 
 ```gdscript
-var marker := DotFxBeacon.new()
+var marker := GSFxBeacon.new()
 marker.colour = Color(1.0, 0.6, 0.1)
 marker.period = 1.0
 marker.local_view = is_my_player        # no column in your own view
@@ -128,13 +128,13 @@ To play the ping through your own sound system, set `marker.ping_enabled = false
 
 ## Weather
 
-`DotFxWeather` draws snow or rain around the camera, inside boxes the map names (or everywhere when it names none). It is one `MultiMesh` moved in a vertex shader, so there are no particle nodes and no collision, and it works under Compatibility in the browser. It is skipped without a display (`DotFxWeather.can_render()` is false on a dedicated server).
+`GSFxWeather` draws snow or rain around the camera, inside boxes the map names (or everywhere when it names none). It is one `MultiMesh` moved in a vertex shader, so there are no particle nodes and no collision, and it works under Compatibility in the browser. It is skipped without a display (`GSFxWeather.can_render()` is false on a dedicated server).
 
 ```gdscript
-var w := DotFxWeather.new()
+var w := GSFxWeather.new()
 add_child(w)
-var res := w.apply(map_document["weather"])   # DotResult; a bad document keeps the old weather
-w.quality = DotFxWeather.Quality.HIGH         # OFF, LOW, HIGH
+var res := w.apply(map_document["weather"])   # GSResult; a bad document keeps the old weather
+w.quality = GSFxWeather.Quality.HIGH         # OFF, LOW, HIGH
 w.density_scale = 1.0
 w.audible_changed.connect(_on_weather_sound)  # (sound id, inside)
 w.advance(delta, camera.global_position)

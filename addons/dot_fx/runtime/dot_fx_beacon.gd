@@ -1,4 +1,4 @@
-class_name DotFxBeacon
+class_name GSFxBeacon
 extends Node3D
 
 ## A marker that says WHERE somebody is: a ring at their feet that sends out a ripple once a

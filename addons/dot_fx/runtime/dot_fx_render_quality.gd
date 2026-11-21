@@ -1,7 +1,7 @@
-class_name DotFxRenderQuality
+class_name GSFxRenderQuality
 extends Node
 
-## Puts a [DotFxRenderConfig] on a viewport: anisotropic filtering, mip bias, anti-aliasing,
+## Puts a [GSFxRenderConfig] on a viewport: anisotropic filtering, mip bias, anti-aliasing,
 ## render scale and FSR sharpening. One node per game, not a project setting, so a player's
 ## menu choice and an operator's cvar both reach a running view.
 
@@ -13,20 +13,20 @@ var viewport: Viewport
 
 ## The scene-wide half (shadows, distances, LOD, particles, post effects, brightness, dynamic resolution),
 ## made by [method follow]; null until then.
-var graphics: DotFxGraphics
+var graphics: GSFxGraphics
 
-var _cfg := DotFxRenderConfig.new()
+var _cfg := GSFxRenderConfig.new()
 var _state := {}
 
 
 ## Applies [param cfg] now (a copy is not taken; change it and call [method apply] again).
-func apply_config(cfg: DotFxRenderConfig) -> void:
+func apply_config(cfg: GSFxRenderConfig) -> void:
 	_cfg = cfg
 	apply()
 
 
 ## Reads the environment (`DOT_FX_RENDER_*`) and command line (`--render-*`) over the defaults and applies them. Returns the result of the layering.
-func load_layers(file_path: String = "") -> DotResult:
+func load_layers(file_path: String = "") -> GSResult:
 	var res := _cfg.load_layered(file_path)
 	apply()
 	return res
@@ -43,11 +43,11 @@ func apply_settings(store: Object) -> void:
 	apply()
 
 
-## Applies the settings now and again whenever one of them changes. Also makes the [DotFxGraphics] child
-## that applies the scene-wide keys ([constant DotFxGraphics.KEYS]) from the same store.
+## Applies the settings now and again whenever one of them changes. Also makes the [GSFxGraphics] child
+## that applies the scene-wide keys ([constant GSFxGraphics.KEYS]) from the same store.
 func follow(store: Object) -> void:
 	if graphics == null:
-		graphics = DotFxGraphics.new()
+		graphics = GSFxGraphics.new()
 		graphics.name = "Graphics"
 		graphics.viewport = viewport
 		add_child(graphics)
@@ -70,11 +70,11 @@ func apply() -> void:
 	var aa := _cfg.effective_aa()
 	var msaa := Viewport.MSAA_DISABLED
 	match aa:
-		DotFxRenderConfig.Aa.MSAA_2X: msaa = Viewport.MSAA_2X
-		DotFxRenderConfig.Aa.MSAA_4X: msaa = Viewport.MSAA_4X
-		DotFxRenderConfig.Aa.MSAA_8X: msaa = Viewport.MSAA_8X
-	var fxaa := aa == DotFxRenderConfig.Aa.FXAA or aa == DotFxRenderConfig.Aa.TAA_FXAA
-	var taa := aa == DotFxRenderConfig.Aa.TAA or aa == DotFxRenderConfig.Aa.TAA_FXAA
+		GSFxRenderConfig.Aa.MSAA_2X: msaa = Viewport.MSAA_2X
+		GSFxRenderConfig.Aa.MSAA_4X: msaa = Viewport.MSAA_4X
+		GSFxRenderConfig.Aa.MSAA_8X: msaa = Viewport.MSAA_8X
+	var fxaa := aa == GSFxRenderConfig.Aa.FXAA or aa == GSFxRenderConfig.Aa.TAA_FXAA
+	var taa := aa == GSFxRenderConfig.Aa.TAA or aa == GSFxRenderConfig.Aa.TAA_FXAA
 	vp.anisotropic_filtering_level = _aniso_enum(_cfg.effective_anisotropy())
 	if graphics != null:
 		graphics.base_mip_bias = _cfg.mip_bias

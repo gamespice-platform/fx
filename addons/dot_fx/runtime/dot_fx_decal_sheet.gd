@@ -1,4 +1,4 @@
-class_name DotFxDecalSheet
+class_name GSFxDecalSheet
 extends RefCounted
 
 ## The vendored decal art, cut into textures once. Blood is six equal frames in one strip;
@@ -31,7 +31,7 @@ static var _graffiti: Dictionary = {}
 
 
 static func _dir() -> String:
-	return (DotFxDecalSheet as Script).resource_path.get_base_dir().get_base_dir().path_join("art")
+	return (GSFxDecalSheet as Script).resource_path.get_base_dir().get_base_dir().path_join("art")
 
 
 static func _image(file: String) -> Image:
@@ -55,7 +55,7 @@ static func blood_frames() -> Array[Texture2D]:
 	return _blood
 
 
-## Extra splat shapes; DotFxDecals.splatter draws them after the six blood frames.
+## Extra splat shapes; GSFxDecals.splatter draws them after the six blood frames.
 static func splat_frames() -> Array[Texture2D]:
 	if _splats.is_empty():
 		var img := _image("splat_pack.png")

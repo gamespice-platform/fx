@@ -1,4 +1,4 @@
-class_name DotFxWeather
+class_name GSFxWeather
 extends Node3D
 
 ## Snow or rain that falls inside boxes the mapper named, and nowhere else, drawn around the
@@ -22,10 +22,10 @@ extends Node3D
 ## in [method describe]; the question is asked of the display server, not the operating system.
 ##
 ## [codeblock]
-## var w := DotFxWeather.new()
+## var w := GSFxWeather.new()
 ## add_child(w)
-## var res := w.apply(map_document["weather"])     # a DotResult; a bad document leaves it off
-## w.quality = DotFxWeather.Quality.HIGH           # a settings menu drives this
+## var res := w.apply(map_document["weather"])     # a GSResult; a bad document leaves it off
+## w.quality = GSFxWeather.Quality.HIGH           # a settings menu drives this
 ## w.audible_changed.connect(func(id, inside): ...) # fade the game's own rain sound
 ## # once a frame
 ## w.advance(delta, camera.global_position)
@@ -63,7 +63,7 @@ signal audible_changed(sound: StringName, inside: bool)
 ## Whether the sound hook says "inside" right now.
 var inside: bool = false
 
-var definition: DotFxWeatherDef = null
+var definition: GSFxWeatherDef = null
 
 var _mmi: MultiMeshInstance3D = null
 var _material: ShaderMaterial = null
@@ -151,7 +151,7 @@ void fragment() {
 ## Whether this process can draw at all. False on a dedicated server or any headless run.
 ## Asked of the display server, so it is a capability and not an operating-system name.
 static func can_render() -> bool:
-	return not DotPlatform.is_headless()
+	return not GSPlatform.is_headless()
 
 
 ## The volumes of [param volumes] that touch [param region], the nearest [param cap] of them to
@@ -179,40 +179,40 @@ static func inside_any(volumes: Array[AABB], point: Vector3) -> bool:
 static func flakes_for(kind: StringName, density: float, q: Quality) -> int:
 	if q == Quality.OFF or density <= 0.0:
 		return 0
-	var base := 3000.0 if kind == DotFxWeatherDef.RAIN else 2500.0
+	var base := 3000.0 if kind == GSFxWeatherDef.RAIN else 2500.0
 	var n := base * density * (0.3 if q == Quality.LOW else 1.0)
 	return mini(int(n), MAX_FLAKES)
 
 
-## Reads a game's [DotFxConfig]: its weather tier and density slider.
-func apply_config(config: DotFxConfig) -> void:
+## Reads a game's [GSFxConfig]: its weather tier and density slider.
+func apply_config(config: GSFxConfig) -> void:
 	quality = config.weather_quality as Quality
 	density_scale = config.weather_density
 
 
 ## Validates [param doc] and sets up from it. A bad document leaves the previous weather alone.
-func apply(doc: Dictionary) -> DotResult:
-	var res := DotFxWeatherDef.parse(doc)
+func apply(doc: Dictionary) -> GSResult:
+	var res := GSFxWeatherDef.parse(doc)
 	if not res.ok:
-		DotLog.warn(CHANNEL, "weather document refused", {"why": res.error.message})
+		GSLog.warn(CHANNEL, "weather document refused", {"why": res.error.message})
 		return res
 	setup(res.value)
-	return DotResult.success(res.value)
+	return GSResult.success(res.value)
 
 
 ## Uses [param def]. Builds the drawing only where there is a display.
-func setup(def: DotFxWeatherDef) -> void:
+func setup(def: GSFxWeatherDef) -> void:
 	definition = def
 	_render = can_render()
 	_dirty = true
 	_last_viewer = Vector3(INF, INF, INF)
 	inside = false
 	if not _render:
-		DotLog.debug(CHANNEL, "weather kept, not drawn: no display", {"kind": def.kind})
+		GSLog.debug(CHANNEL, "weather kept, not drawn: no display", {"kind": def.kind})
 		return
 	if _mmi == null:
 		_build()
-	var rain := def.kind == DotFxWeatherDef.RAIN
+	var rain := def.kind == GSFxWeatherDef.RAIN
 	_box = Vector3(24, 20, 24) if rain else Vector3(28, 18, 28)
 	var fall := Vector3(0, -14.0 if rain else -1.6, 0) + def.wind
 	_material.set_shader_parameter("tint", def.colour)

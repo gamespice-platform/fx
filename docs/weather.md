@@ -1,6 +1,6 @@
 # Weather
 
-`DotFxWeather` is the one thing in dot-fx that is a continuous effect rather than a spawned one. It takes a document ([`DotFxWeatherDef`](../addons/dot_fx/core/dot_fx_weather_def.gd)), the camera's position once a frame, and draws snow or rain around the camera inside the document's volumes.
+`GSFxWeather` is the one thing in dot-fx that is a continuous effect rather than a spawned one. It takes a document ([`GSFxWeatherDef`](../addons/dot_fx/core/dot_fx_weather_def.gd)), the camera's position once a frame, and draws snow or rain around the camera inside the document's volumes.
 
 ## Why a shader and not particles
 
@@ -20,8 +20,8 @@ A flake is only drawn inside the camera box (28 by 18 by 28 m for snow, 24 by 20
 
 | What | Where |
 | --- | --- |
-| Off, low, high | `DotFxWeather.quality`, or `DotFxConfig.weather_quality` through `apply_config()`. Low draws 30% of the flakes. |
-| Player density slider | `density_scale`, `DotFxConfig.weather_density`, multiplies the document's density |
+| Off, low, high | `GSFxWeather.quality`, or `GSFxConfig.weather_quality` through `apply_config()`. Low draws 30% of the flakes. |
+| Player density slider | `density_scale`, `GSFxConfig.weather_density`, multiplies the document's density |
 | Colour, wind, density | the document |
 | Flake cap | `MAX_FLAKES` (8000) |
 
@@ -31,7 +31,7 @@ GameSpice FX ships none. The document's `sound` is an id the game maps to its ow
 
 ## No display
 
-`DotFxWeather.can_render()` is `not DotPlatform.is_headless()`. Without a display, `setup()` keeps the definition and the sound hook still works, but nothing is built, so a dedicated server may load a map document carrying weather at no cost.
+`GSFxWeather.can_render()` is `not GSPlatform.is_headless()`. Without a display, `setup()` keeps the definition and the sound hook still works, but nothing is built, so a dedicated server may load a map document carrying weather at no cost.
 
 ## Known limits
 

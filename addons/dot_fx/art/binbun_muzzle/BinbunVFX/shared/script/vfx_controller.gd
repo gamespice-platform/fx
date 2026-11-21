@@ -1,6 +1,6 @@
 @tool
 extends Node3D
-class_name DotMuzzleVfxController
+class_name GSMuzzleVfxController
 
 ## Works only in the editor. By default works like "emitting" on particles. When one_shot is enabled works as a button. 
 @export var preview : bool = true:

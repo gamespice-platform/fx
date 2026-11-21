@@ -1,4 +1,4 @@
-class_name DotFxSoftSprite
+class_name GSFxSoftSprite
 extends RefCounted
 ## A soft round particle sprite and the material that draws it: a particle quad with no texture is a hard square.
 

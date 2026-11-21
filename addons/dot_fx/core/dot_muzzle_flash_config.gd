@@ -1,8 +1,8 @@
 @tool
-class_name DotMuzzleFlashConfig
-extends DotConfig
+class_name GSMuzzleFlashConfig
+extends GSConfig
 
-## Muzzle flash settings, layered like every [DotConfig] (`DOT_MUZZLE_*`, `--muzzle-*`).
+## Muzzle flash settings, layered like every [GSConfig] (`DOT_MUZZLE_*`, `--muzzle-*`).
 
 ## 0 off, 1 hard-edged and no light (cheapest, web and mobile), 2 dithered with a light, 3 smooth with a light.
 @export_range(0, 3, 1) var quality: int = 3

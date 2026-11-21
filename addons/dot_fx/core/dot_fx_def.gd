@@ -1,5 +1,5 @@
 @tool
-class_name DotFxDef
+class_name GSFxDef
 extends Resource
 
 ## One visual effect, as a document that names a scene and never loads one.
@@ -19,7 +19,7 @@ enum Kind {
 	## A scene instanced at a transform and freed when it is done. Particles, a muzzle
 	## flash, a shatter.
 	SPAWNED,
-	## A mark left on the world. Bounded by a ring; see [DotFxManager].
+	## A mark left on the world. Bounded by a ring; see [GSFxManager].
 	DECAL,
 	## A full-screen tint or flash. See [member flash_peak] before raising it.
 	SCREEN,
@@ -77,14 +77,14 @@ enum Kind {
 
 @export_group("Shake")
 
-## Trauma added, 0..1. Squared before it is applied; see [DotFxShake].
+## Trauma added, 0..1. Squared before it is applied; see [GSFxShake].
 @export_range(0.0, 1.0, 0.01) var shake_trauma: float = 0.0
 
 @export_group("Screen")
 
 ## Peak opacity of a full-screen flash, 0..1.
 ##
-## [b]Read [member DotFxConfig.allow_flashes] before raising this.[/b] A full-screen
+## [b]Read [member GSFxConfig.allow_flashes] before raising this.[/b] A full-screen
 ## flash at high frequency is a photosensitivity hazard, not a style choice: the accepted
 ## guidance is no more than three general flashes a second and no large-area red flashes
 ## at all. The manager enforces a rate limit and a player-facing off switch, and both of
@@ -97,25 +97,25 @@ enum Kind {
 @export_range(1, 10000, 1) var flash_decay_ms: int = 250
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if id == &"":
-		return DotResult.fail(DotError.CODE_INVALID, "an effect with no id")
+		return GSResult.fail(GSError.CODE_INVALID, "an effect with no id")
 	if kind == Kind.SPAWNED or kind == Kind.DECAL or kind == Kind.BEAM:
 		if scene_path.is_empty():
-			return DotResult.fail(
-				DotError.CODE_INVALID, "'%s' is a scene effect that names no scene" % id
+			return GSResult.fail(
+				GSError.CODE_INVALID, "'%s' is a scene effect that names no scene" % id
 			)
 	if kind == Kind.SHAKE and shake_trauma <= 0.0:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"'%s' is a shake with no trauma in it" % id,
 			"which is an effect that is guaranteed to do nothing"
 		)
 	if kind == Kind.SCREEN and flash_peak <= 0.0:
-		return DotResult.fail(
-			DotError.CODE_INVALID, "'%s' is a screen effect with no opacity" % id
+		return GSResult.fail(
+			GSError.CODE_INVALID, "'%s' is a screen effect with no opacity" % id
 		)
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 func describe_line() -> String:

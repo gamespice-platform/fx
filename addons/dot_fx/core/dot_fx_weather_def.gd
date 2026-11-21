@@ -1,11 +1,11 @@
-class_name DotFxWeatherDef
+class_name GSFxWeatherDef
 extends RefCounted
 
 ## Falling weather as a document: what falls, where, how thick, how windy, what colour.
 ##
 ## [b]A document so a map can carry it.[/b] A map's author writes the precipitation volumes where
 ## the weather falls (a brush volume in a map source becomes one box here), the game hands the
-## dictionary to [method parse], and the result is either a definition or a [DotResult] that
+## dictionary to [method parse], and the result is either a definition or a [GSResult] that
 ## says which key was wrong. Nothing here touches a renderer, so the same call validates a
 ## document on a server that will never draw it.
 ##
@@ -54,54 +54,54 @@ var sound: StringName = &""
 
 
 ## A definition from a dictionary, or a failure naming the key. Succeeds with a
-## [DotFxWeatherDef] as its value.
-static func parse(doc: Dictionary) -> DotResult:
+## [GSFxWeatherDef] as its value.
+static func parse(doc: Dictionary) -> GSResult:
 	for key in doc:
 		if not (key is String) or not _KEYS.has(key):
-			return DotResult.fail(DotError.CODE_INVALID, "weather: unknown key '%s'" % str(key))
+			return GSResult.fail(GSError.CODE_INVALID, "weather: unknown key '%s'" % str(key))
 
-	var d := DotFxWeatherDef.new()
+	var d := GSFxWeatherDef.new()
 
 	var k := str(doc.get("kind", ""))
 	if k != "snow" and k != "rain":
-		return DotResult.fail(DotError.CODE_INVALID, "weather: 'kind' must be \"snow\" or \"rain\", not '%s'" % k)
+		return GSResult.fail(GSError.CODE_INVALID, "weather: 'kind' must be \"snow\" or \"rain\", not '%s'" % k)
 	d.kind = StringName(k)
 
 	var dens: Variant = doc.get("density", 1.0)
 	if not (dens is float or dens is int) or not is_finite(float(dens)) or float(dens) < 0.0 or float(dens) > 4.0:
-		return DotResult.fail(DotError.CODE_INVALID, "weather: 'density' must be a number from 0 to 4")
+		return GSResult.fail(GSError.CODE_INVALID, "weather: 'density' must be a number from 0 to 4")
 	d.density = float(dens)
 
 	if doc.has("wind"):
 		var w := _vec3(doc["wind"])
 		if w == null:
-			return DotResult.fail(DotError.CODE_INVALID, "weather: 'wind' must be [x, y, z]")
+			return GSResult.fail(GSError.CODE_INVALID, "weather: 'wind' must be [x, y, z]")
 		d.wind = w
 
 	if doc.has("colour"):
 		var c: Variant = _colour(doc["colour"])
 		if c == null:
-			return DotResult.fail(DotError.CODE_INVALID, "weather: 'colour' must be an html colour or [r, g, b(, a)]")
+			return GSResult.fail(GSError.CODE_INVALID, "weather: 'colour' must be an html colour or [r, g, b(, a)]")
 		d.colour = c
 
 	if doc.has("sound"):
 		if not (doc["sound"] is String or doc["sound"] is StringName):
-			return DotResult.fail(DotError.CODE_INVALID, "weather: 'sound' must be a string")
+			return GSResult.fail(GSError.CODE_INVALID, "weather: 'sound' must be a string")
 		d.sound = StringName(str(doc["sound"]))
 
 	if doc.has("volumes"):
 		var vs: Variant = doc["volumes"]
 		if not (vs is Array):
-			return DotResult.fail(DotError.CODE_INVALID, "weather: 'volumes' must be an array")
+			return GSResult.fail(GSError.CODE_INVALID, "weather: 'volumes' must be an array")
 		if vs.size() > MAX_VOLUMES:
-			return DotResult.fail(DotError.CODE_INVALID, "weather: %d volumes, at most %d" % [vs.size(), MAX_VOLUMES])
+			return GSResult.fail(GSError.CODE_INVALID, "weather: %d volumes, at most %d" % [vs.size(), MAX_VOLUMES])
 		for i in range(vs.size()):
 			var box: Variant = _box(vs[i])
 			if box == null:
-				return DotResult.fail(DotError.CODE_INVALID, "weather: volume %d needs min+max or center+size, finite and not inside out" % i)
+				return GSResult.fail(GSError.CODE_INVALID, "weather: volume %d needs min+max or center+size, finite and not inside out" % i)
 			d.volumes.append(box)
 
-	return DotResult.success(d)
+	return GSResult.success(d)
 
 
 ## The document this was parsed from, so a definition built in code can be saved with a map.

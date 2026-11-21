@@ -1,4 +1,4 @@
-class_name DotFxScreenGoo
+class_name GSFxScreenGoo
 extends CanvasLayer
 
 ## A full-screen goo, ink or oil overlay that blinds the viewer more as its amount rises.

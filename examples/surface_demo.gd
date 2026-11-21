@@ -5,12 +5,12 @@ extends Node3D
 
 var _shot := ""
 var _frames := 0
-var _fx: DotFxManager
+var _fx: GSFxManager
 var _crate: RigidBody3D
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
 	for i in range(args.size()):
 		if args[i] == "--shot" and i + 1 < args.size():
@@ -30,14 +30,14 @@ func _ready() -> void:
 	_solid(_crate, Vector3(1.2, 1.2, 1.2), Vector3(3, 0.6, -2), Color(0.7, 0.45, 0.2))
 	_solid(CharacterBody3D.new(), Vector3(0.7, 1.8, 0.7), Vector3(-3, 0.9, -2), Color(0.3, 0.6, 0.3))
 
-	var cat := DotFxCatalogue.new()
-	var def := DotFxDef.new()
+	var cat := GSFxCatalogue.new()
+	var def := GSFxDef.new()
 	def.id = &"hole"
-	def.kind = DotFxDef.Kind.DECAL
+	def.kind = GSFxDef.Kind.DECAL
 	def.scene_path = "res://fixtures/hole.tscn"
 	def.lifetime_ms = 600000
 	cat.add(def)
-	_fx = DotFxManager.new()
+	_fx = GSFxManager.new()
 	_fx.catalogue = cat
 	_fx.register_as_service = false
 	add_child(_fx)

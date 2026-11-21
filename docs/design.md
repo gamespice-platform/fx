@@ -19,13 +19,13 @@ The suite's budget section says so in its own comment, so that the next person t
 
 ### Camera shake must be able to be zero
 
-`DotFxConfig.shake_scale` reaches 0 and is read **every frame** by `advance()`, so a player turning it off sees it stop immediately rather than at the next map. Camera shake is one of the commonest causes of simulator sickness; a game that cannot turn it off is a game some people cannot play at all.
+`GSFxConfig.shake_scale` reaches 0 and is read **every frame** by `advance()`, so a player turning it off sees it stop immediately rather than at the next map. Camera shake is one of the commonest causes of simulator sickness; a game that cannot turn it off is a game some people cannot play at all.
 
 The suite asserts a scale of zero produces `Vector3.ZERO` exactly, not "small", because a residual wobble is the failure this setting exists to prevent.
 
 ### Flashes are rate limited and can be refused
 
-`allow_flashes` is a player-facing switch. `flashes_per_second` defaults to **3**, which is the published guidance on photosensitivity, and `flash_cap` bounds what any definition can ask for. All three are enforced in `DotFxManager.flash()` rather than left to callers, because a convention that every caller must remember is one the next feature breaks, and the person it harms cannot tell which effect did it.
+`allow_flashes` is a player-facing switch. `flashes_per_second` defaults to **3**, which is the published guidance on photosensitivity, and `flash_cap` bounds what any definition can ask for. All three are enforced in `GSFxManager.flash()` rather than left to callers, because a convention that every caller must remember is one the next feature breaks, and the person it harms cannot tell which effect did it.
 
 ## Two details that make shake read as shake
 
@@ -52,7 +52,7 @@ Deliberately opposite. An effect's whole value is being seen at the moment it ha
 
 ## The beacon is the one thing here that draws
 
-`DotFxBeacon` is a ring at a player's feet with a ripple once a period, a column with no depth test above them, and a positional ping: an administrator's `beacon`, and the hiding games' rule that gives the last players of a side away. Several games had grown their own copy, three byte for byte. It is built from primitives (two flattened tori and a cylinder) and synthesises its ping when it is given no stream, so it ships no art and no sound, which is the line the next section draws. It keeps the invariant: nothing about it changes the simulation, it is placed where a player is drawn, and the server only decides who is marked. Set `local_view` for the marked player's own view, or a first-person camera stands inside the column. `ping_enabled = false` (API level 3) builds no voice but `advance()` still reports each pulse: a game with its own sound catalogue plays its ping from that return, because two voices for one pulse is the bug the option exists to prevent. `resize(radius, height, base)` (API level 4) changes the ring and column of a marker that is already running, in place, keeping its phase and voice: a marker that follows somebody into a vehicle and out again must not be rebuilt each time.
+`GSFxBeacon` is a ring at a player's feet with a ripple once a period, a column with no depth test above them, and a positional ping: an administrator's `beacon`, and the hiding games' rule that gives the last players of a side away. Several games had grown their own copy, three byte for byte. It is built from primitives (two flattened tori and a cylinder) and synthesises its ping when it is given no stream, so it ships no art and no sound, which is the line the next section draws. It keeps the invariant: nothing about it changes the simulation, it is placed where a player is drawn, and the server only decides who is marked. Set `local_view` for the marked player's own view, or a first-person camera stands inside the column. `ping_enabled = false` (API level 3) builds no voice but `advance()` still reports each pulse: a game with its own sound catalogue plays its ping from that return, because two voices for one pulse is the bug the option exists to prevent. `resize(radius, height, base)` (API level 4) changes the ring and column of a marker that is already running, in place, keeping its phase and voice: a marker that follows somebody into a vehicle and out again must not be rebuilt each time.
 
 ## Things deliberately not here
 

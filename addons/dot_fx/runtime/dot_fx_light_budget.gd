@@ -1,11 +1,11 @@
-class_name DotFxLightBudget
+class_name GSFxLightBudget
 extends RefCounted
 
 ## One process-wide count of lit dynamic lights, so muzzle flashes and pooled lights share a cap.
 
 const CHANNEL := "fx.light"
 
-static var config := DotFxPoolConfig.new()
+static var config := GSFxPoolConfig.new()
 
 ## Expiry tick (msec) of each light currently taking a slot.
 static var _until: Array[int] = []
@@ -19,7 +19,7 @@ static func try_take(seconds: float) -> bool:
 	if _until.size() >= config.effective_max_lights():
 		_refused += 1
 		if _refused == 1 or _refused % 100 == 0:
-			DotLog.debug(CHANNEL, "light cap reached", {"cap": config.effective_max_lights(), "refused": _refused})
+			GSLog.debug(CHANNEL, "light cap reached", {"cap": config.effective_max_lights(), "refused": _refused})
 		return false
 	_until.append(now + maxi(1, roundi(seconds * 1000.0)))
 	return true

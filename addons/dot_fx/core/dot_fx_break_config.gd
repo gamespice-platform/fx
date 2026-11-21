@@ -1,9 +1,9 @@
 @tool
-class_name DotFxBreakConfig
-extends DotConfig
+class_name GSFxBreakConfig
+extends GSConfig
 
-## What a player and an operator say about [DotFxBreak]: off, how much, how many at once.
-## Layered like every [DotConfig] (defaults < JSON < environment `DOT_FX_BREAK_*` < command line `--break-*`).
+## What a player and an operator say about [GSFxBreak]: off, how much, how many at once.
+## Layered like every [GSConfig] (defaults < JSON < environment `DOT_FX_BREAK_*` < command line `--break-*`).
 
 ## Whether breaking props throw particles and make a sound at all.
 @export var enabled: bool = true
@@ -40,14 +40,14 @@ func cli_prefix() -> String:
 	return "--break-"
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if max_particles < 0 or max_live < 0:
-		return DotResult.fail(DotError.CODE_INVALID, "max_particles and max_live cannot be negative")
-	return DotResult.success(null)
+		return GSResult.fail(GSError.CODE_INVALID, "max_particles and max_live cannot be negative")
+	return GSResult.success(null)
 
 
 ## Particle count multiplier after the platform: mobile and web take [member light_scale].
 func effective_scale() -> float:
 	if not enabled:
 		return 0.0
-	return scale * (light_scale if DotPlatform.is_mobile() or DotPlatform.is_web() else 1.0)
+	return scale * (light_scale if GSPlatform.is_mobile() or GSPlatform.is_web() else 1.0)

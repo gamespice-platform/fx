@@ -1,21 +1,21 @@
 @tool
-class_name DotFxCatalogue
+class_name GSFxCatalogue
 extends Resource
 
 ## Every effect a game has, as a document a server can check with no renderer.
 
-@export var defs: Array[DotFxDef] = []
+@export var defs: Array[GSFxDef] = []
 
 var _by_id: Dictionary = {}
 
 
-func add(def: DotFxDef) -> DotFxCatalogue:
+func add(def: GSFxDef) -> GSFxCatalogue:
 	defs.append(def)
 	_by_id.clear()
 	return self
 
 
-func find(id: StringName) -> DotFxDef:
+func find(id: StringName) -> GSFxDef:
 	_ensure_index()
 	return _by_id.get(id)
 
@@ -49,22 +49,22 @@ func _ensure_index() -> void:
 			_by_id[d.id] = d
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	var seen := {}
 	for d in defs:
 		if d == null:
-			return DotResult.fail(DotError.CODE_INVALID, "a null entry in the catalogue")
+			return GSResult.fail(GSError.CODE_INVALID, "a null entry in the catalogue")
 		var res := d.validate()
 		if not res.ok:
 			return res
 		if seen.has(d.id):
-			return DotResult.fail(
-				DotError.CODE_INVALID,
+			return GSResult.fail(
+				GSError.CODE_INVALID,
 				"effect id '%s' appears twice" % d.id,
 				"the second one is unreachable and nothing would ever say so"
 			)
 		seen[d.id] = true
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 ## Which scenes named here are not present. A separate question from validity.

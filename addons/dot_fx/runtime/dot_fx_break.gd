@@ -1,4 +1,4 @@
-class_name DotFxBreak
+class_name GSFxBreak
 extends Node
 
 ## Splinters, shards, sparks or chunks, and a crack, where a prop breaks, keyed by its material. A game adds one node and calls [method burst] from its break signal; nothing here touches the simulation.
@@ -17,7 +17,7 @@ const ALIASES := {
 	"flesh": "plastic", "web": "plastic", "rubber": "plastic",
 }
 
-var config := DotFxBreakConfig.new()
+var config := GSFxBreakConfig.new()
 ## Why the last [method burst] returned null, empty after one that spawned.
 var last_refusal := ""
 ## Bursts drawn since this node entered the tree.
@@ -33,7 +33,7 @@ func _ready() -> void:
 	apply_config(config)
 
 
-func apply_config(cfg: DotFxBreakConfig) -> void:
+func apply_config(cfg: GSFxBreakConfig) -> void:
 	config = cfg
 	if cfg.seed_value != 0:
 		_rng.seed = cfg.seed_value
@@ -79,7 +79,7 @@ func burst(material: String, at: Vector3, normal: Vector3 = Vector3.UP, size: fl
 	if not config.enabled:
 		last_refusal = "disabled"
 		return null
-	if DotPlatform.is_headless() and not config.headless:
+	if GSPlatform.is_headless() and not config.headless:
 		last_refusal = "headless"
 		return null
 	_prune()
@@ -102,7 +102,7 @@ func burst(material: String, at: Vector3, normal: Vector3 = Vector3.UP, size: fl
 	_live.append(root)
 	spawned += 1
 	get_tree().create_timer(maxf(lifetime, 0.1) + 0.3).timeout.connect(root.queue_free)
-	DotLog.trace(CHANNEL, "break", {"material": String(kind), "particles": count})
+	GSLog.trace(CHANNEL, "break", {"material": String(kind), "particles": count})
 	return root
 
 
@@ -168,7 +168,7 @@ func _particles(root: Node3D, kind: StringName, count: int, up: Vector3, width: 
 		dust.color_ramp = ramp
 		var quad := QuadMesh.new()
 		quad.size = Vector2.ONE
-		quad.material = DotFxSoftSprite.material(Color.WHITE, false)
+		quad.material = GSFxSoftSprite.material(Color.WHITE, false)
 		dust.mesh = quad
 		root.add_child(dust)
 		dust.emitting = true
@@ -235,14 +235,14 @@ func _sound(root: Node3D, kind: StringName) -> float:
 
 
 func _stream(kind: StringName, variant: int) -> AudioStream:
-	var path := "%s/art/break_sounds/%s_%d.ogg" % [(DotFxBreak as Script).resource_path.get_base_dir().get_base_dir(), kind, variant]
+	var path := "%s/art/break_sounds/%s_%d.ogg" % [(GSFxBreak as Script).resource_path.get_base_dir().get_base_dir(), kind, variant]
 	if _streams.has(path):
 		return _streams[path]
 	var s: AudioStream = null
 	if ResourceLoader.exists(path):
 		s = load(path) as AudioStream
 	if s == null:
-		DotLog.warn(CHANNEL, "break sound missing", {"path": path})
+		GSLog.warn(CHANNEL, "break sound missing", {"path": path})
 	_streams[path] = s
 	return s
 

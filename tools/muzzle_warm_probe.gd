@@ -4,8 +4,8 @@ extends SceneTree
 ## process signal to the renderer's pre-draw) and the draw part (pre-draw to post-draw), so a shader compile shows up
 ## in the frame that pays it. Needs a display (never --headless):
 ##   godot --path . --rendering-driver opengl3 --script res://tools/muzzle_warm_probe.gd -- [--mode=prewarm|pinonly]
-## prewarm: DotMuzzleFlash.prewarm() as a game calls it under a loading cover (every size in one frame).
-## pinonly: DotMuzzleFlash.pin_scenes() alone (loads every flash scene, draws none).
+## prewarm: GSMuzzleFlash.prewarm() as a game calls it under a loading cover (every size in one frame).
+## pinonly: GSMuzzleFlash.pin_scenes() alone (loads every flash scene, draws none).
 ## Prints one "muzzle_probe frame:" line per frame and a "muzzle_probe worst:" line at the end.
 
 var _mode := "prewarm"
@@ -77,9 +77,9 @@ func _step() -> void:
 	var t := Time.get_ticks_usec()
 	match _mode:
 		"pinonly":
-			_done = DotMuzzleFlash.pin_scenes(1 << 30)
+			_done = GSMuzzleFlash.pin_scenes(1 << 30)
 		_:
-			_rig = DotMuzzleFlash.prewarm(_cam)
+			_rig = GSMuzzleFlash.prewarm(_cam)
 			_rig.position = Vector3(0.0, 0.0, -0.5)
 			_done = true
 	_call_ms = (Time.get_ticks_usec() - t) / 1000.0

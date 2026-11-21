@@ -8,17 +8,17 @@ var _frames := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	cfg.seed_value = 3
 	for i in range(args.size()):
 		if args[i] == "--shot" and i + 1 < args.size():
 			_shot = args[i + 1]
 		if args[i] == "--mode=mesh":
-			cfg.mode = DotFxDecalConfig.Mode.MESH
+			cfg.mode = GSFxDecalConfig.Mode.MESH
 		if args[i] == "--mode=decal":
-			cfg.mode = DotFxDecalConfig.Mode.DECAL
+			cfg.mode = GSFxDecalConfig.Mode.DECAL
 
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
@@ -31,7 +31,7 @@ func _ready() -> void:
 	add_child(_box(Vector3(0, -0.25, 0), Vector3(14, 0.5, 10), Color(0.45, 0.45, 0.42)))
 	add_child(_box(Vector3(0, 2.5, -4.25), Vector3(14, 5, 0.5), Color(0.6, 0.58, 0.55)))
 
-	var decals := DotFxDecals.new()
+	var decals := GSFxDecals.new()
 	add_child(decals)
 	decals.apply_config(cfg)
 	var docs: Array = [

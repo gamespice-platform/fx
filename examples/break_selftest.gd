@@ -1,6 +1,6 @@
 extends Node
 
-## Headless checks for [DotFxBreak]: one burst per material with particles and a sound, aliases, frees
+## Headless checks for [GSFxBreak]: one burst per material with particles and a sound, aliases, frees
 ## itself, off spawns none, the caps, a headless refusal, config layering. Looks: break_demo.tscn.
 
 const SECTIONS := 6
@@ -12,7 +12,7 @@ var _section_count := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_materials()
 	_aliases()
 	_switches()
@@ -28,9 +28,9 @@ func _ready() -> void:
 	get_tree().quit(1 if _failed > 0 else 0)
 
 
-func _make(cfg: DotFxBreakConfig = null) -> DotFxBreak:
-	var b := DotFxBreak.new()
-	var c := cfg if cfg != null else DotFxBreakConfig.new()
+func _make(cfg: GSFxBreakConfig = null) -> GSFxBreak:
+	var b := GSFxBreak.new()
+	var c := cfg if cfg != null else GSFxBreakConfig.new()
 	c.headless = true
 	c.seed_value = 5
 	b.config = c
@@ -41,7 +41,7 @@ func _make(cfg: DotFxBreakConfig = null) -> DotFxBreak:
 func _materials() -> void:
 	_section("each material spawns particles and a sound")
 	var b := _make()
-	for m: String in DotFxBreak.MATERIALS:
+	for m: String in GSFxBreak.MATERIALS:
 		var n := b.burst(m, Vector3(1, 2, 3), Vector3.UP, 1.0)
 		_check(n != null, "%s spawns" % m)
 		if n == null:
@@ -58,16 +58,16 @@ func _materials() -> void:
 
 func _aliases() -> void:
 	_section("source material names map onto the five")
-	_check(DotFxBreak.canonical("concrete") == &"stone", "concrete is stone")
-	_check(DotFxBreak.canonical("unbreakable_glass") == &"glass", "unbreakable_glass is glass")
-	_check(DotFxBreak.canonical("computer") == &"metal", "computer is metal")
-	_check(DotFxBreak.canonical("Wood") == &"wood", "case is ignored")
-	_check(DotFxBreak.canonical("nonsense") == &"glass", "unknown falls back to glass")
+	_check(GSFxBreak.canonical("concrete") == &"stone", "concrete is stone")
+	_check(GSFxBreak.canonical("unbreakable_glass") == &"glass", "unbreakable_glass is glass")
+	_check(GSFxBreak.canonical("computer") == &"metal", "computer is metal")
+	_check(GSFxBreak.canonical("Wood") == &"wood", "case is ignored")
+	_check(GSFxBreak.canonical("nonsense") == &"glass", "unknown falls back to glass")
 
 
 func _switches() -> void:
 	_section("off, no sound, scale 0, headless")
-	var cfg := DotFxBreakConfig.new()
+	var cfg := GSFxBreakConfig.new()
 	cfg.enabled = false
 	var b := _make(cfg)
 	_check(b.burst("wood", Vector3.ZERO) == null and b.last_refusal == "disabled", "disabled spawns none")
@@ -87,7 +87,7 @@ func _switches() -> void:
 
 func _caps() -> void:
 	_section("particle and live caps")
-	var cfg := DotFxBreakConfig.new()
+	var cfg := GSFxBreakConfig.new()
 	cfg.max_particles = 10
 	cfg.max_live = 3
 	var b := _make(cfg)
@@ -115,7 +115,7 @@ func _frees() -> void:
 
 func _config() -> void:
 	_section("config layering")
-	var cfg := DotFxBreakConfig.new()
+	var cfg := GSFxBreakConfig.new()
 	var rep: Variant = cfg.apply_dictionary({"enabled": false, "scale": 2.0, "max_live": 4})
 	_check(not cfg.enabled and cfg.scale == 2.0 and cfg.max_live == 4, "a dictionary sets keys")
 	_check(cfg.effective_scale() == 0.0, "disabled has no effective scale")

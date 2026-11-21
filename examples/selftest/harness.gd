@@ -6,8 +6,8 @@ var _failed := 0
 var _section_count := 0
 
 
-func _def(id: StringName, kind: DotFxDef.Kind = DotFxDef.Kind.SPAWNED) -> DotFxDef:
-	var d := DotFxDef.new()
+func _def(id: StringName, kind: GSFxDef.Kind = GSFxDef.Kind.SPAWNED) -> GSFxDef:
+	var d := GSFxDef.new()
 	d.id = id
 	d.kind = kind
 	d.scene_path = "res://fixtures/blob.tscn"
@@ -15,8 +15,8 @@ func _def(id: StringName, kind: DotFxDef.Kind = DotFxDef.Kind.SPAWNED) -> DotFxD
 	return d
 
 
-func _catalogue() -> DotFxCatalogue:
-	var c := DotFxCatalogue.new()
+func _catalogue() -> GSFxCatalogue:
+	var c := GSFxCatalogue.new()
 
 	var cheap := _def(&"spark")
 	cheap.cost = 1
@@ -31,20 +31,20 @@ func _catalogue() -> DotFxCatalogue:
 	dear.max_distance = 0.0
 	c.add(dear)
 
-	var hole := _def(&"bullet_hole", DotFxDef.Kind.DECAL)
+	var hole := _def(&"bullet_hole", GSFxDef.Kind.DECAL)
 	hole.cost = 1
 	hole.max_distance = 0.0
 	c.add(hole)
 
-	var boom := DotFxDef.new()
+	var boom := GSFxDef.new()
 	boom.id = &"grenade_shake"
-	boom.kind = DotFxDef.Kind.SHAKE
+	boom.kind = GSFxDef.Kind.SHAKE
 	boom.shake_trauma = 0.6
 	c.add(boom)
 
-	var hurt := DotFxDef.new()
+	var hurt := GSFxDef.new()
 	hurt.id = &"hurt_flash"
-	hurt.kind = DotFxDef.Kind.SCREEN
+	hurt.kind = GSFxDef.Kind.SCREEN
 	hurt.flash_peak = 0.9
 	hurt.flash_colour = Color(1, 0, 0, 1)
 	hurt.flash_decay_ms = 200
@@ -53,10 +53,10 @@ func _catalogue() -> DotFxCatalogue:
 	return c
 
 
-func _manager(cfg: DotFxConfig = null) -> DotFxManager:
-	var m := DotFxManager.new()
+func _manager(cfg: GSFxConfig = null) -> GSFxManager:
+	var m := GSFxManager.new()
 	m.catalogue = _catalogue()
-	m.config = cfg if cfg != null else DotFxConfig.new()
+	m.config = cfg if cfg != null else GSFxConfig.new()
 	m.register_as_service = false
 	add_child(m)
 	m.setup()

@@ -1,8 +1,8 @@
-class_name DotFxDecals
+class_name GSFxDecals
 extends Node3D
 
 ## Pooled blood splatters from hits plus static wall decals placed from data; purely visual.
-## At [method DotFxDecalConfig.effective_blood_cap] the oldest node is reused. Time is explicit: call [method advance] each frame.
+## At [method GSFxDecalConfig.effective_blood_cap] the oldest node is reused. Time is explicit: call [method advance] each frame.
 ## Decal nodes where the renderer has them, quads just off the surface otherwise (Compatibility, browser).
 
 const CHANNEL := "fx.decals"
@@ -10,7 +10,7 @@ const CHANNEL := "fx.decals"
 ## A static decal was placed (id may be empty).
 signal placed(id: StringName)
 
-var config := DotFxDecalConfig.new()
+var config := GSFxDecalConfig.new()
 
 var _rng := RandomNumberGenerator.new()
 var _blood_root := Node3D.new()
@@ -33,13 +33,13 @@ func _init() -> void:
 
 ## Whether this renderer has Decal nodes. Compatibility (the web, older GPUs) does not.
 static func decal_nodes_supported() -> bool:
-	if DotPlatform.is_web():
+	if GSPlatform.is_web():
 		return false
 	return RenderingServer.get_current_rendering_method() != "gl_compatibility"
 
 
 ## Takes a config, seeds the generator and applies the tier, gore switch and caps at once.
-func apply_config(cfg: DotFxDecalConfig) -> void:
+func apply_config(cfg: GSFxDecalConfig) -> void:
 	config = cfg
 	_rng.seed = cfg.seed_value if cfg.seed_value != 0 else int(Time.get_ticks_usec())
 	_tint = Color.html(cfg.blood_colour) if Color.html_is_valid(cfg.blood_colour) else Color.WHITE
@@ -52,9 +52,9 @@ func apply_config(cfg: DotFxDecalConfig) -> void:
 ## True when Decal nodes (not quads) are in use under the current config.
 func uses_decal_nodes() -> bool:
 	match config.mode:
-		DotFxDecalConfig.Mode.DECAL:
+		GSFxDecalConfig.Mode.DECAL:
 			return true
-		DotFxDecalConfig.Mode.MESH:
+		GSFxDecalConfig.Mode.MESH:
 			return false
 	return decal_nodes_supported()
 
@@ -65,12 +65,12 @@ func splatter(position: Vector3, normal: Vector3, size_scale: float = 1.0, frame
 	var cap := config.effective_blood_cap()
 	if not config.gore or cap <= 0:
 		return null
-	var frames := DotFxDecalSheet.blood_frames()
+	var frames := GSFxDecalSheet.blood_frames()
 	if frames.is_empty():
-		DotLog.warn(CHANNEL, "blood art missing")
+		GSLog.warn(CHANNEL, "blood art missing")
 		return null
 	if config.extra_blood:
-		frames = frames + DotFxDecalSheet.splat_frames()
+		frames = frames + GSFxDecalSheet.splat_frames()
 	_trim()
 	var node: Node3D
 	if _blood.size() >= cap:
@@ -88,46 +88,46 @@ func splatter(position: Vector3, normal: Vector3, size_scale: float = 1.0, frame
 	return node
 
 
-## Validates and places one static decal from a document, a [DotResult] holding its node.
+## Validates and places one static decal from a document, a [GSResult] holding its node.
 ## Keys: image, position, normal, width, roll, colour, opacity, id.
 ## Unknown keys are refused so a misspelt "normal" cannot read as the default and paint the floor.
-func place(doc: Dictionary) -> DotResult:
+func place(doc: Dictionary) -> GSResult:
 	var res := _parse(doc)
 	if not res.ok:
 		return res
 	var p: Dictionary = res.value
 	if _static.size() >= config.max_static:
-		return DotResult.fail(DotError.CODE_STATE, "static decal cap reached", str(config.max_static))
+		return GSResult.fail(GSError.CODE_STATE, "static decal cap reached", str(config.max_static))
 	var id: StringName = p["id"]
 	if id == &"":
 		_anon_static += 1
 		id = StringName("_anon%d" % _anon_static)
 	if _static.has(id):
-		return DotResult.fail(DotError.CODE_CONFLICT, "decal id already placed", str(id))
+		return GSResult.fail(GSError.CODE_CONFLICT, "decal id already placed", str(id))
 	var node := _make_node()
 	_static_root.add_child(node)
 	_configure(node, p["tex"], p["position"], p["normal"], p["size"], p["roll"], p["colour"], p["opacity"])
 	_static[id] = node
 	placed.emit(p["id"])
-	return DotResult.success(node)
+	return GSResult.success(node)
 
 
 ## Places every document, or none: a bad one is reported with its index and nothing is placed.
 ## The value is the number placed.
-func place_all(docs: Array) -> DotResult:
+func place_all(docs: Array) -> GSResult:
 	for i in range(docs.size()):
 		if typeof(docs[i]) != TYPE_DICTIONARY:
-			return DotResult.fail(DotError.CODE_INVALID, "decal %d is not a dictionary" % i)
+			return GSResult.fail(GSError.CODE_INVALID, "decal %d is not a dictionary" % i)
 		var r := _parse(docs[i])
 		if not r.ok:
 			return r.wrap("decal %d" % i)
 	if _static.size() + docs.size() > config.max_static:
-		return DotResult.fail(DotError.CODE_STATE, "static decal cap reached", str(config.max_static))
+		return GSResult.fail(GSError.CODE_STATE, "static decal cap reached", str(config.max_static))
 	for d in docs:
 		var r := place(d)
 		if not r.ok:
 			return r
-	return DotResult.success(docs.size())
+	return GSResult.success(docs.size())
 
 
 ## Removes a static decal by id; false when there is none.
@@ -189,7 +189,7 @@ func blood_alpha(n: int) -> float:
 
 
 func describe() -> String:
-	return "DotFxDecals: %d blood (cap %d), %d static, %s, gore %s, quality %d" % [
+	return "GSFxDecals: %d blood (cap %d), %d static, %s, gore %s, quality %d" % [
 		_blood.size(), config.effective_blood_cap(), _static.size(),
 		"Decal nodes" if uses_decal_nodes() else "quads", "on" if config.gore else "off", config.quality]
 
@@ -269,29 +269,29 @@ func _alpha_of(node: Node3D) -> float:
 const _KEYS := ["id", "image", "position", "normal", "width", "roll", "colour", "opacity"]
 
 
-func _parse(doc: Dictionary) -> DotResult:
+func _parse(doc: Dictionary) -> GSResult:
 	for k in doc:
 		if not _KEYS.has(String(k)):
-			return DotResult.fail(DotError.CODE_INVALID, "unknown decal key", str(k))
-	var tex := DotFxDecalSheet.decal_image(StringName(str(doc.get("image", ""))))
+			return GSResult.fail(GSError.CODE_INVALID, "unknown decal key", str(k))
+	var tex := GSFxDecalSheet.decal_image(StringName(str(doc.get("image", ""))))
 	if tex == null:
-		return DotResult.fail(DotError.CODE_INVALID, "unknown decal image", str(doc.get("image", "")))
+		return GSResult.fail(GSError.CODE_INVALID, "unknown decal image", str(doc.get("image", "")))
 	var pos = _vec3(doc.get("position"))
 	if pos == null:
-		return DotResult.fail(DotError.CODE_INVALID, "position must be [x, y, z]")
+		return GSResult.fail(GSError.CODE_INVALID, "position must be [x, y, z]")
 	var normal = _vec3(doc.get("normal", [0, 1, 0]))
 	if normal == null or (normal as Vector3).length_squared() < 0.0001:
-		return DotResult.fail(DotError.CODE_INVALID, "normal must be a non-zero [x, y, z]")
+		return GSResult.fail(GSError.CODE_INVALID, "normal must be a non-zero [x, y, z]")
 	var width := float(doc.get("width", 1.0))
 	if width <= 0.0 or width > 50.0:
-		return DotResult.fail(DotError.CODE_INVALID, "width must be above 0 and at most 50")
+		return GSResult.fail(GSError.CODE_INVALID, "width must be above 0 and at most 50")
 	var colour := Color.WHITE
 	if doc.has("colour"):
 		if not Color.html_is_valid(str(doc["colour"])):
-			return DotResult.fail(DotError.CODE_INVALID, "colour is not an html colour")
+			return GSResult.fail(GSError.CODE_INVALID, "colour is not an html colour")
 		colour = Color.html(str(doc["colour"]))
 	var aspect := float(tex.get_height()) / float(tex.get_width())
-	return DotResult.success({
+	return GSResult.success({
 		"id": StringName(str(doc.get("id", ""))), "tex": tex, "position": pos, "normal": normal,
 		"size": Vector2(width, width * aspect), "roll": float(doc.get("roll", 0.0)),
 		"colour": colour, "opacity": clampf(float(doc.get("opacity", 1.0)), 0.0, 1.0),

@@ -1,9 +1,9 @@
-class_name DotFxGraphics
+class_name GSFxGraphics
 extends Node
 
 ## The scene-wide video settings a viewport property cannot carry: shadows, view and prop distance, mesh LOD,
 ## particles, foliage density, ambient occlusion, glow, reflections, brightness and dynamic resolution.
-## [DotFxRenderQuality] makes one and feeds it the settings store (duck-typed: dot-fx does not depend on
+## [GSFxRenderQuality] makes one and feeds it the settings store (duck-typed: dot-fx does not depend on
 ## dot-settings). Every change is undoable: the first time a node or resource is touched its own value is kept in
 ## meta, and a setting at its default ("the map's own") puts that value back.
 ## It also turns the plain trilinear filter of a [BaseMaterial3D] into the anisotropic one, so the
@@ -65,7 +65,7 @@ var viewport: Viewport
 var prop_max_size: float = 8.0
 ## The resolved values; read by [method describe] and the suites.
 var values := DEFAULTS.duplicate()
-## Mip bias the player or operator picked ([DotFxRenderQuality] sets it); texture quality adds to it.
+## Mip bias the player or operator picked ([GSFxRenderQuality] sets it); texture quality adds to it.
 var base_mip_bias: float = 0.0
 ## The dynamic resolution share of the render scale in use (1 when off) and the share of the prop distance it still allows.
 var dyn_scale: float = 1.0

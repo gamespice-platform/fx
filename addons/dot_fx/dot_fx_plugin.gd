@@ -10,7 +10,7 @@ const _ICON := "res://addons/dot_fx/icon_placeholder.svg"
 
 const _TYPES := [
 	[
-		"DotFxManager",
+		"GSFxManager",
 		"Node",
 		"res://addons/dot_fx/runtime/dot_fx_manager.gd",
 	],

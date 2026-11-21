@@ -1,4 +1,4 @@
-class_name DotFxBeam
+class_name GSFxBeam
 extends Node3D
 
 ## A straight energy beam between two points: a thin glowing cylinder that shimmers and fades.
@@ -21,8 +21,8 @@ var _seed: float = 0.0
 
 ## One short flash from [param from] to [param to], added under [param parent].
 static func zap(parent: Node, from: Vector3, to: Vector3, p_colour: Color = Color(0.45, 0.8, 1.0),
-		seconds: float = 0.25, p_width: float = 0.08) -> DotFxBeam:
-	var beam := DotFxBeam.new()
+		seconds: float = 0.25, p_width: float = 0.08) -> GSFxBeam:
+	var beam := GSFxBeam.new()
 	beam.colour = p_colour
 	beam.lifetime = seconds
 	beam.width = p_width
@@ -32,8 +32,8 @@ static func zap(parent: Node, from: Vector3, to: Vector3, p_colour: Color = Colo
 
 
 ## A beam to keep alive by calling [method set_ends] each frame.
-static func hold(parent: Node, p_colour: Color = Color(0.45, 0.8, 1.0), p_width: float = 0.1) -> DotFxBeam:
-	var beam := DotFxBeam.new()
+static func hold(parent: Node, p_colour: Color = Color(0.45, 0.8, 1.0), p_width: float = 0.1) -> GSFxBeam:
+	var beam := GSFxBeam.new()
 	beam.colour = p_colour
 	beam.width = p_width
 	beam._held = true

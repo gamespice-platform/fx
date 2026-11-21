@@ -1,9 +1,9 @@
 @tool
-class_name DotFxDecalConfig
-extends DotConfig
+class_name GSFxDecalConfig
+extends GSConfig
 
-## What a player and an operator get to say about [DotFxDecals]: the gore toggle, a quality
-## tier, how many marks exist, how long blood lasts. Layered like every [DotConfig]
+## What a player and an operator get to say about [GSFxDecals]: the gore toggle, a quality
+## tier, how many marks exist, how long blood lasts. Layered like every [GSConfig]
 ## (defaults < JSON < environment `DOT_FX_DECAL_*` < command line `--decal-*`).
 
 ## Mode of drawing. Auto uses Decal nodes where the renderer has them and quads where it does not.
@@ -49,7 +49,7 @@ enum Mode { AUTO, DECAL, MESH }
 ## Distance beyond which a Decal node fades out, in metres. Zero turns that off.
 @export_range(0.0, 1000.0, 1.0) var fade_distance: float = 60.0
 
-## Most static decals (graffiti and the like) that [method DotFxDecals.place] accepts.
+## Most static decals (graffiti and the like) that [method GSFxDecals.place] accepts.
 @export_range(0, 4096, 1) var max_static: int = 512
 
 ## Seed for the random choice of frame, size and roll; zero seeds from the clock.
@@ -64,12 +64,12 @@ func cli_prefix() -> String:
 	return "--decal-"
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if blood_size_min > blood_size_max:
-		return DotResult.fail(DotError.CODE_INVALID, "blood_size_min is above blood_size_max")
+		return GSResult.fail(GSError.CODE_INVALID, "blood_size_min is above blood_size_max")
 	if not Color.html_is_valid(blood_colour):
-		return DotResult.fail(DotError.CODE_INVALID, "blood_colour is not an html colour")
-	return DotResult.success(null)
+		return GSResult.fail(GSError.CODE_INVALID, "blood_colour is not an html colour")
+	return GSResult.success(null)
 
 
 ## Blood cap after the quality tier.

@@ -1,6 +1,6 @@
 extends Node
 
-## Headless checks for [DotFxRenderQuality]: platform picks, snapping, and what lands on a viewport.
+## Headless checks for [GSFxRenderQuality]: platform picks, snapping, and what lands on a viewport.
 
 const SECTIONS := 3
 const CHECKS := 17
@@ -11,7 +11,7 @@ var _section_count := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_config()
 	_viewport()
 	_store()
@@ -26,9 +26,9 @@ func _ready() -> void:
 
 func _config() -> void:
 	_section("Config picks and snaps")
-	var c := DotFxRenderConfig.new()
-	_check(c.effective_anisotropy() == (16 if DotPlatform.is_desktop() else 4), "auto anisotropy follows the platform")
-	_check(c.effective_aa() == (DotFxRenderConfig.Aa.MSAA_4X if DotPlatform.is_desktop() else DotFxRenderConfig.Aa.FXAA), "auto aa follows the platform")
+	var c := GSFxRenderConfig.new()
+	_check(c.effective_anisotropy() == (16 if GSPlatform.is_desktop() else 4), "auto anisotropy follows the platform")
+	_check(c.effective_aa() == (GSFxRenderConfig.Aa.MSAA_4X if GSPlatform.is_desktop() else GSFxRenderConfig.Aa.FXAA), "auto aa follows the platform")
 	c.anisotropy = 7
 	_check(c.effective_anisotropy() == 4, "7 snaps down to 4")
 	c.anisotropy = 16
@@ -37,30 +37,30 @@ func _config() -> void:
 	_check(c.effective_anisotropy() == 0, "1 is off")
 	c.anisotropy = 0
 	_check(c.effective_anisotropy() == 0, "0 is off")
-	c.aa = DotFxRenderConfig.Aa.TAA
-	_check(c.effective_aa() == DotFxRenderConfig.Aa.TAA, "an explicit aa is kept")
+	c.aa = GSFxRenderConfig.Aa.TAA
+	_check(c.effective_aa() == GSFxRenderConfig.Aa.TAA, "an explicit aa is kept")
 
 
 func _viewport() -> void:
 	_section("It lands on the viewport")
-	var q := DotFxRenderQuality.new()
+	var q := GSFxRenderQuality.new()
 	add_child(q)
-	var c := DotFxRenderConfig.new()
+	var c := GSFxRenderConfig.new()
 	c.anisotropy = 8
-	c.aa = DotFxRenderConfig.Aa.MSAA_2X
+	c.aa = GSFxRenderConfig.Aa.MSAA_2X
 	c.mip_bias = -0.5
 	q.apply_config(c)
 	var vp := get_viewport()
 	_check(vp.anisotropic_filtering_level == Viewport.ANISOTROPY_8X, "8x")
 	_check(vp.msaa_3d == Viewport.MSAA_2X, "msaa 2x")
 	_check(is_equal_approx(vp.texture_mipmap_bias, -0.5), "mip bias")
-	c.aa = DotFxRenderConfig.Aa.TAA_FXAA
+	c.aa = GSFxRenderConfig.Aa.TAA_FXAA
 	q.apply()
-	var ssaa_ok := not DotFxRenderQuality._has_screen_space_aa() or (vp.use_taa and vp.screen_space_aa == Viewport.SCREEN_SPACE_AA_FXAA)
+	var ssaa_ok := not GSFxRenderQuality._has_screen_space_aa() or (vp.use_taa and vp.screen_space_aa == Viewport.SCREEN_SPACE_AA_FXAA)
 	_check(ssaa_ok and vp.msaa_3d == Viewport.MSAA_DISABLED, "taa+fxaa clears msaa (screen-space parts only where the renderer has them)")
 	c.render_scale = 0.7
 	q.apply()
-	_check(vp.scaling_3d_mode == (Viewport.SCALING_3D_MODE_FSR if DotFxRenderQuality._has_fsr() else Viewport.SCALING_3D_MODE_BILINEAR), "scale under 1 uses FSR where the renderer has it")
+	_check(vp.scaling_3d_mode == (Viewport.SCALING_3D_MODE_FSR if GSFxRenderQuality._has_fsr() else Viewport.SCALING_3D_MODE_BILINEAR), "scale under 1 uses FSR where the renderer has it")
 	c.render_scale = 1.0
 	q.apply()
 	_check(vp.scaling_3d_mode == Viewport.SCALING_3D_MODE_BILINEAR, "scale 1 is native")
@@ -70,8 +70,8 @@ func _viewport() -> void:
 func _store() -> void:
 	_section("A settings store drives it")
 	var s := _Store.new()
-	s.values = {&"aniso": 2, &"aa": DotFxRenderConfig.Aa.FXAA}
-	var q := DotFxRenderQuality.new()
+	s.values = {&"aniso": 2, &"aa": GSFxRenderConfig.Aa.FXAA}
+	var q := GSFxRenderQuality.new()
 	add_child(q)
 	q.follow(s)
 	_check(get_viewport().anisotropic_filtering_level == Viewport.ANISOTROPY_2X, "read at follow")

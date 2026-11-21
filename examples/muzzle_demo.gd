@@ -13,11 +13,11 @@ var _after := 2
 var _near := false
 ## Guns point down -Z as a weapon's muzzle does, flashes unrotated, seen from the side.
 var _fwd := false
-var _flashes: Array[DotMuzzleFlash] = []
+var _flashes: Array[GSMuzzleFlash] = []
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
 	var fp := false
 	for i in range(args.size()):
@@ -44,11 +44,11 @@ func _ready() -> void:
 	we.environment = env
 	add_child(we)
 	add_child(_box(Vector3(2.5, -0.1, 0), Vector3(14, 0.2, 4), Color(0.3, 0.3, 0.28)))
-	var sizes := [DotMuzzleFlash.Size.VERY_SMALL, DotMuzzleFlash.Size.SMALL, DotMuzzleFlash.Size.MEDIUM, DotMuzzleFlash.Size.BIG]
+	var sizes := [GSMuzzleFlash.Size.VERY_SMALL, GSMuzzleFlash.Size.SMALL, GSMuzzleFlash.Size.MEDIUM, GSMuzzleFlash.Size.BIG]
 	for i in sizes.size():
 		var y := 3.6 - i * 1.0
 		add_child(_box(Vector3(-0.3, y, 0), Vector3(1.0, 0.25, 0.25), Color(0.2, 0.2, 0.22)))
-		var f := DotMuzzleFlash.new()
+		var f := GSMuzzleFlash.new()
 		f.size = sizes[i]
 		f.first_person = fp
 		f.variant = _variant

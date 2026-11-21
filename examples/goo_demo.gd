@@ -5,11 +5,11 @@ extends Node3D
 
 var _shot := ""
 var _frames := 0
-var _goo: DotFxScreenGoo = null
+var _goo: GSFxScreenGoo = null
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
 	var amount := 0.6
 	for i in range(args.size()):
@@ -33,7 +33,7 @@ func _ready() -> void:
 	cam.position = Vector3(0, 1.7, 5)
 	add_child(cam)
 	cam.look_at(Vector3(0, 1.5, -6))
-	_goo = DotFxScreenGoo.new()
+	_goo = GSFxScreenGoo.new()
 	add_child(_goo)
 	_goo.apply(amount, 60.0, 0.0, 0.0)
 

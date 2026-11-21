@@ -1,10 +1,10 @@
-class_name DotFxManager
+class_name GSFxManager
 extends Node
 
 ## The node a game holds: an id and a place, and an effect appears — or honestly does not.
 ##
 ## [codeblock]
-## var fx := DotFxManager.new()
+## var fx := GSFxManager.new()
 ## fx.catalogue = my_catalogue
 ## add_child(fx)
 ## fx.setup()
@@ -35,17 +35,17 @@ signal spawned(id: StringName, node: Node, why: StringName)
 ## limited, or refused by the player's own setting.
 signal flashed(id: StringName, colour: Color, peak: float, applied: bool)
 
-@export var catalogue: DotFxCatalogue = null
+@export var catalogue: GSFxCatalogue = null
 
-@export var config: DotFxConfig = null
+@export var config: GSFxConfig = null
 
 ## Where spawned effects are parented. Resolved per instance, in the inspector.
 ##
-## A [DotNodeRef] rather than a path, for the family's rule and for a practical reason: an
+## A [GSNodeRef] rather than a path, for the family's rule and for a practical reason: an
 ## effect parented into the world is destroyed with the world on a map change, and one
 ## parented to the manager is not. Which of those a game wants is a decision the game
 ## makes, not this addon.
-@export var world_ref: DotNodeRef = null
+@export var world_ref: GSNodeRef = null
 
 @export var register_as_service: bool = true
 
@@ -58,11 +58,11 @@ signal flashed(id: StringName, colour: Color, peak: float, applied: bool)
 ## Where the camera is, for culling. A game sets this once a frame.
 var viewer_position: Vector3 = Vector3.ZERO
 
-## Which way it is looking, for [member DotFxConfig.cull_behind].
+## Which way it is looking, for [member GSFxConfig.cull_behind].
 var viewer_forward: Vector3 = Vector3.FORWARD
 
 ## The shake, which computes a value and touches no camera.
-var shake: DotFxShake = null
+var shake: GSFxShake = null
 
 ## The current screen flash colour and strength. A game draws it; this does not.
 ##
@@ -85,19 +85,19 @@ var _scene_cache: Dictionary = {}
 
 
 func _init() -> void:
-	shake = DotFxShake.new()
+	shake = GSFxShake.new()
 	if config == null:
-		config = DotFxConfig.new()
+		config = GSFxConfig.new()
 
 
-func setup() -> DotResult:
+func setup() -> GSResult:
 	if catalogue == null:
-		catalogue = DotFxCatalogue.new()
+		catalogue = GSFxCatalogue.new()
 	var res := catalogue.validate()
 	if not res.ok:
 		return res.wrap("fx catalogue")
 	if config == null:
-		config = DotFxConfig.new()
+		config = GSFxConfig.new()
 	var cres := config.validate()
 	if not cres.ok:
 		return cres.wrap("fx config")
@@ -111,14 +111,14 @@ func setup() -> DotResult:
 
 	_budget_left = config.frame_budget
 	if register_as_service:
-		DotRegistry.register(SERVICE, self)
-	return DotResult.success(null)
+		GSRegistry.register(SERVICE, self)
+	return GSResult.success(null)
 
 
 func _exit_tree() -> void:
 	clear()
 	if register_as_service:
-		DotRegistry.unregister_instance(SERVICE, self)
+		GSRegistry.unregister_instance(SERVICE, self)
 
 
 # --- The frame --------------------------------------------------------------
@@ -158,11 +158,11 @@ func spawn(id: StringName, at: Transform3D, scale_hint: float = 1.0) -> Node:
 		return null
 
 	match def.kind:
-		DotFxDef.Kind.SHAKE:
+		GSFxDef.Kind.SHAKE:
 			shake.add(def.shake_trauma * scale_hint)
 			spawned.emit(id, null, &"ok")
 			return null
-		DotFxDef.Kind.SCREEN:
+		GSFxDef.Kind.SCREEN:
 			flash(id)
 			return null
 		_:
@@ -184,12 +184,12 @@ func spawn(id: StringName, at: Transform3D, scale_hint: float = 1.0) -> Node:
 		"id": id,
 		"node": node,
 		"expires": Time.get_ticks_msec() + def.lifetime_ms,
-		"decal": def.kind == DotFxDef.Kind.DECAL,
+		"decal": def.kind == GSFxDef.Kind.DECAL,
 		"cost": def.cost,
 		"priority": def.priority,
 	}
 	_this_frame.append(entry)
-	if def.kind == DotFxDef.Kind.DECAL:
+	if def.kind == GSFxDef.Kind.DECAL:
 		_decals.append(entry)
 		_trim_decals()
 	_live.append(entry)
@@ -220,7 +220,7 @@ func spawn_2d(id: StringName, at: Vector2, rotation: float = 0.0) -> Node:
 	return spawn(id, t)
 
 
-## A decal on the entry face and one on the exit face of every wall in [param penetrations] (the entries of GameSpice Combat's `DotShot.penetrations`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
+## A decal on the entry face and one on the exit face of every wall in [param penetrations] (the entries of GameSpice Combat's `GSShot.penetrations`). Returns how many were placed; none when [member GSFxConfig.penetration_decals] is off.
 func spawn_penetration_decals(penetrations: Array, id: StringName = &"bullet_hole") -> int:
 	if config == null or not config.penetration_decals:
 		return 0
@@ -237,7 +237,7 @@ func spawn_penetration_decals(penetrations: Array, id: StringName = &"bullet_hol
 	return placed
 
 
-## A bullet mark at each bounce point in [param ricochets] (GameSpice Combat's `DotShot.ricochets`). Returns how many were placed; none when [member DotFxConfig.penetration_decals] is off.
+## A bullet mark at each bounce point in [param ricochets] (GameSpice Combat's `GSShot.ricochets`). Returns how many were placed; none when [member GSFxConfig.penetration_decals] is off.
 func spawn_ricochet_decals(ricochets: Array, id: StringName = &"bullet_hole") -> int:
 	if config == null or not config.penetration_decals:
 		return 0
@@ -314,7 +314,7 @@ func shake_at(id: StringName, position: Vector3, falloff: float = 30.0) -> void:
 	shake.add_at(def.shake_trauma, viewer_position.distance_to(position), falloff)
 
 
-func _may_spawn(def: DotFxDef, where: Vector3) -> StringName:
+func _may_spawn(def: GSFxDef, where: Vector3) -> StringName:
 	if config.quality < def.min_quality:
 		return &"quality"
 
@@ -371,7 +371,7 @@ func _place(node: Node, at: Transform3D) -> void:
 		)
 
 
-func _instance(def: DotFxDef, at: Transform3D = Transform3D.IDENTITY) -> Node:
+func _instance(def: GSFxDef, at: Transform3D = Transform3D.IDENTITY) -> Node:
 	if def.scene_path.is_empty():
 		return null
 	var packed: PackedScene = _scene_cache.get(def.scene_path)
@@ -379,7 +379,7 @@ func _instance(def: DotFxDef, at: Transform3D = Transform3D.IDENTITY) -> Node:
 		if not ResourceLoader.exists(def.scene_path):
 			# Not an error. A client whose content pack is still arriving asks for scenes
 			# it does not have, and skipping one is safe by this addon's central property.
-			DotLog.debug(CHANNEL, "no such scene", {"path": def.scene_path})
+			GSLog.debug(CHANNEL, "no such scene", {"path": def.scene_path})
 			return null
 		packed = load(def.scene_path) as PackedScene
 		if packed == null:
@@ -397,9 +397,9 @@ func _instance(def: DotFxDef, at: Transform3D = Transform3D.IDENTITY) -> Node:
 ##
 ## [b]Only this frame's.[/b] The budget is what may START in a frame; an effect from an earlier
 ## frame has been seen and costs nothing more, so displacing it would refund nothing real.
-## [member DotFxDef.priority] used to be documented as "higher survives when the budget is
+## [member GSFxDef.priority] used to be documented as "higher survives when the budget is
 ## spent" and read by nothing: the budget went first come, first served.
-func _make_room(def: DotFxDef) -> bool:
+func _make_room(def: GSFxDef) -> bool:
 	var lower: Array[Dictionary] = []
 	var freed := 0
 	for entry: Dictionary in _this_frame:
@@ -434,7 +434,7 @@ func _retire(index: int) -> void:
 
 
 ## The oldest effect that is not a decal, else the oldest decal. Decals used to be skipped
-## outright, so with [member DotFxConfig.max_instances] of long-lived decals alive (both
+## outright, so with [member GSFxConfig.max_instances] of long-lived decals alive (both
 ## default to 256) every spawn was refused, a decal's own ring included.
 func _retire_oldest() -> bool:
 	for i in range(_live.size()):

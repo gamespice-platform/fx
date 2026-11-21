@@ -8,4 +8,4 @@ The download (MuzzleFlashVFX.zip) contains no licence file. The licence is state
 
 Credit is given anyway in the README. The "ExtraTexturesForSupporters" download is a separate paid file and is not included.
 
-Changes made here (permitted by CC0): the files moved under addons/dot_fx/art/binbun_muzzle/, resource paths rewritten to match, the .ptex texture sources and unused placeholder.png dropped, and the two helper scripts' class_name renamed to DotMuzzleVfxController and DotMuzzleVfxLight so they cannot collide with the author's other packs.
+Changes made here (permitted by CC0): the files moved under addons/dot_fx/art/binbun_muzzle/, resource paths rewritten to match, the .ptex texture sources and unused placeholder.png dropped, and the two helper scripts' class_name renamed to GSMuzzleVfxController and GSMuzzleVfxLight so they cannot collide with the author's other packs.

@@ -1,4 +1,4 @@
-class_name DotFxThruster
+class_name GSFxThruster
 extends Node3D
 
 ## A jet's exhaust: flame and smoke blown along this node's -Y, scaled by [member throttle],
@@ -54,7 +54,7 @@ func _emitter(life: float, count: int, from: Color, to: Color, size: float, grow
 	# A soft sprite: the old six-sided sphere read as a hard faceted blob.
 	var mesh := QuadMesh.new()
 	mesh.size = Vector2.ONE
-	mesh.material = DotFxSoftSprite.material(Color.WHITE, glow)
+	mesh.material = GSFxSoftSprite.material(Color.WHITE, glow)
 	p.mesh = mesh
 	add_child(p)
 	return p

@@ -1,10 +1,10 @@
 @tool
-class_name DotFxRenderConfig
-extends DotConfig
+class_name GSFxRenderConfig
+extends GSConfig
 
 ## Texture and edge quality of the 3D view: anisotropic filtering, anti-aliasing, mip bias and
-## sharpening. Layered like every [DotConfig] (defaults < JSON < environment `DOT_FX_RENDER_*`
-## < command line `--render-*`). Applied by [DotFxRenderQuality].
+## sharpening. Layered like every [GSConfig] (defaults < JSON < environment `DOT_FX_RENDER_*`
+## < command line `--render-*`). Applied by [GSFxRenderQuality].
 
 ## Anti-aliasing choices. TAA and FXAA are shader passes (cheap, soft); MSAA is geometry edges only.
 enum Aa { AUTO, OFF, FXAA, MSAA_2X, MSAA_4X, MSAA_8X, TAA, TAA_FXAA }
@@ -41,7 +41,7 @@ func cli_prefix() -> String:
 ## The anisotropy that will be applied: the platform's pick for -1, else the value snapped down to 0, 2, 4, 8 or 16.
 func effective_anisotropy() -> int:
 	if anisotropy < 0:
-		return 16 if DotPlatform.is_desktop() else 4
+		return 16 if GSPlatform.is_desktop() else 4
 	for tap in [16, 8, 4, 2]:
 		if anisotropy >= tap:
 			return tap
@@ -52,4 +52,4 @@ func effective_anisotropy() -> int:
 func effective_aa() -> int:
 	if aa != Aa.AUTO:
 		return aa
-	return Aa.MSAA_4X if DotPlatform.is_desktop() else Aa.FXAA
+	return Aa.MSAA_4X if GSPlatform.is_desktop() else Aa.FXAA

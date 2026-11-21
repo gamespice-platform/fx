@@ -1,7 +1,7 @@
 extends Node3D
 
 ## Snow in one box and rain in another, with a floor and posts so the edges can be seen. Run it
-## under a display; headless it draws nothing, which is the point of [method DotFxWeather.can_render].
+## under a display; headless it draws nothing, which is the point of [method GSFxWeather.can_render].
 ##
 ## [codeblock]
 ## godot --path . res://examples/weather_demo.tscn
@@ -10,15 +10,15 @@ extends Node3D
 ##
 ## Keys: Q cycles the quality (off, low, high), W/S move the camera forward and back.
 
-var _snow := DotFxWeather.new()
-var _rain := DotFxWeather.new()
+var _snow := GSFxWeather.new()
+var _rain := GSFxWeather.new()
 var _cam := Camera3D.new()
 var _shot_path := ""
 var _frames := 0
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
 	if args.size() >= 2 and args[0] == "--shot":
 		_shot_path = args[1]
@@ -93,7 +93,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if k == null or not k.pressed:
 		return
 	if k.keycode == KEY_Q:
-		var q := ((int(_snow.quality) + 2) % 3) as DotFxWeather.Quality
+		var q := ((int(_snow.quality) + 2) % 3) as GSFxWeather.Quality
 		_snow.quality = q
 		_rain.quality = q
 	elif k.keycode == KEY_W:

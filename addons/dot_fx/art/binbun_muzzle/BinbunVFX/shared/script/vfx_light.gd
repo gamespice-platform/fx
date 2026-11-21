@@ -1,6 +1,6 @@
 @tool
 extends OmniLight3D
-class_name DotMuzzleVfxLight
+class_name GSMuzzleVfxLight
 
 @export var base_energy : float = 2.0:
 	set(value):

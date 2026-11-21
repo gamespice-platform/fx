@@ -5,7 +5,7 @@ extends "res://examples/selftest/harness.gd"
 func _test_definitions() -> void:
 	_section("An effect is a document that names a scene")
 
-	var d := DotFxDef.new()
+	var d := GSFxDef.new()
 	_check(not d.validate().ok, "an effect with no id is refused")
 	d.id = &"x"
 	_check(not d.validate().ok, "and a scene effect that names no scene")
@@ -15,9 +15,9 @@ func _test_definitions() -> void:
 		"while one naming a scene that does not exist validates, because a server has none"
 	)
 
-	var shake := DotFxDef.new()
+	var shake := GSFxDef.new()
 	shake.id = &"s"
-	shake.kind = DotFxDef.Kind.SHAKE
+	shake.kind = GSFxDef.Kind.SHAKE
 	_check(
 		not shake.validate().ok,
 		"a shake with no trauma is refused, because it is guaranteed to do nothing"
@@ -25,9 +25,9 @@ func _test_definitions() -> void:
 	shake.shake_trauma = 0.3
 	_check(shake.validate().ok, "and one with some is fine")
 
-	var screen := DotFxDef.new()
+	var screen := GSFxDef.new()
 	screen.id = &"f"
-	screen.kind = DotFxDef.Kind.SCREEN
+	screen.kind = GSFxDef.Kind.SCREEN
 	screen.flash_peak = 0.0
 	_check(not screen.validate().ok, "and a flash with no opacity, for the same reason")
 
@@ -41,7 +41,7 @@ func _test_catalogue() -> void:
 	_check(c.find(&"spark") != null, "and finds")
 	_check(c.find(&"nope") == null, "and does not invent")
 
-	var dupe := DotFxCatalogue.new()
+	var dupe := GSFxCatalogue.new()
 	dupe.add(_def(&"twice")).add(_def(&"twice"))
 	_check(not dupe.validate().ok, "a duplicate id is refused")
 
@@ -49,7 +49,7 @@ func _test_catalogue() -> void:
 	# a client with a broken export both look like well-formed documents with absent scenes.
 	_check(c.missing_scenes().is_empty(), "a catalogue whose scenes are all here is missing none")
 
-	var absent := DotFxCatalogue.new()
+	var absent := GSFxCatalogue.new()
 	var gone := _def(&"gone")
 	gone.scene_path = "res://fixtures/there_is_no_such_scene.tscn"
 	absent.add(gone)
@@ -61,8 +61,8 @@ func _test_catalogue() -> void:
 		Array(absent.missing_scenes()) == [gone.scene_path],
 		"and says which one is missing, because that is a different question from validity"
 	)
-	var bodiless := DotFxCatalogue.new()
-	bodiless.add(_def(&"shake_only", DotFxDef.Kind.SHAKE))
+	var bodiless := GSFxCatalogue.new()
+	bodiless.add(_def(&"shake_only", GSFxDef.Kind.SHAKE))
 	bodiless.defs[0].scene_path = ""
 	_check(
 		bodiless.missing_scenes().is_empty(),
@@ -78,7 +78,7 @@ func _test_catalogue() -> void:
 func _test_quality_gate() -> void:
 	_section("A low tier is missing effects, not running them badly")
 
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.quality = 0
 	cfg.frame_budget = 0
 	var m := _manager(cfg)
@@ -112,7 +112,7 @@ func _test_quality_gate() -> void:
 func _test_budget_and_culling() -> void:
 	_section("A frame's worth, and no further")
 
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.quality = 3
 	cfg.frame_budget = 10
 	cfg.max_instances = 1000
@@ -136,7 +136,7 @@ func _test_budget_and_culling() -> void:
 	_budget_priority(m)
 
 	# A refused request retires nothing: the budget is asked before the instance cap recycles.
-	var tight := DotFxConfig.new()
+	var tight := GSFxConfig.new()
 	tight.quality = 3
 	tight.frame_budget = 1
 	tight.max_instances = 1
@@ -181,7 +181,7 @@ func _test_budget_and_culling() -> void:
 	m.queue_free()
 
 
-func _budget_priority(m: DotFxManager) -> void:
+func _budget_priority(m: GSFxManager) -> void:
 	# Priority decides what a full frame keeps: the collapse (40, priority 90) asked for after
 	# ten sparks (1 each, priority 20) takes the room of five of them, in the same frame.
 	m.config.frame_budget = 45
@@ -225,7 +225,7 @@ func _lifetime_ceiling() -> void:
 func _test_decal_ring() -> void:
 	_section("Decals are a ring, because an unbounded list grows with the round")
 
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.quality = 3
 	cfg.frame_budget = 0
 	cfg.max_decals = 4
@@ -266,7 +266,7 @@ func _test_decal_ring() -> void:
 func _test_shake() -> void:
 	_section("Shake is a value, and has to be able to be off")
 
-	var s := DotFxShake.new()
+	var s := GSFxShake.new()
 	_check(not s.active(), "nothing is shaking to start with")
 	_check(s.offset() == Vector3.ZERO, "and the offset is exactly zero")
 
@@ -320,7 +320,7 @@ func _test_shake() -> void:
 	_shake_scale(s)
 
 
-func _shake_scale(s: DotFxShake) -> void:
+func _shake_scale(s: GSFxShake) -> void:
 	# The accessibility half, and the reason it is read every frame.
 	s.scale = 0.0
 	_check(not s.active(), "a scale of zero turns it off entirely")
@@ -397,7 +397,7 @@ func _test_flash_limits() -> void:
 
 func _test_screen_goo() -> void:
 	_section("screen goo: envelope, stacking, status path")
-	var goo := DotFxScreenGoo.new()
+	var goo := GSFxScreenGoo.new()
 	add_child(goo)
 	_check(goo.amount() == 0.0, "starts clear")
 	goo.apply(0.5, 4.0, 1.0, 1.0)
@@ -434,7 +434,7 @@ func _test_screen_goo() -> void:
 
 func _test_penetration_decals() -> void:
 	_section("A wallbang leaves a hole on both faces of the wall")
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.quality = 3
 	cfg.frame_budget = 0
 	var m := _manager(cfg)

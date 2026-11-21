@@ -1,4 +1,4 @@
-class_name DotFxLightPool
+class_name GSFxLightPool
 extends Node3D
 
 ## Reused OmniLight3D nodes for impact flashes, so none is built or freed mid-match. Place it yourself; no autoload.
@@ -9,9 +9,9 @@ var _free: Array[OmniLight3D] = []
 var _all: Array[OmniLight3D] = []
 
 
-## Builds [param count] lights (default [member DotFxPoolConfig.prewarm_lights]) and shows each for [param frames] frames so the renderer compiles them now.
+## Builds [param count] lights (default [member GSFxPoolConfig.prewarm_lights]) and shows each for [param frames] frames so the renderer compiles them now.
 func prewarm(count: int = -1, frames: int = 2) -> void:
-	var n := DotFxLightBudget.config.prewarm_lights if count < 0 else count
+	var n := GSFxLightBudget.config.prewarm_lights if count < 0 else count
 	for i in n:
 		var light := _make()
 		light.light_energy = 0.001
@@ -27,7 +27,7 @@ func prewarm(count: int = -1, frames: int = 2) -> void:
 
 ## Lights a pooled light at [param at] for [param seconds]; null when the cap is full (the caller still draws the effect, just unlit).
 func flash(at: Vector3, colour: Color, energy: float, light_range: float, seconds: float) -> OmniLight3D:
-	if not DotFxLightBudget.try_take(seconds):
+	if not GSFxLightBudget.try_take(seconds):
 		return null
 	var light: OmniLight3D = _free.pop_back() if not _free.is_empty() else _make()
 	light.position = at

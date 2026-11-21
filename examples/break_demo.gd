@@ -7,11 +7,11 @@ var _shot := ""
 var _t := 0.0
 var _fired := false
 var _at := 0.25
-var _brk: DotFxBreak
+var _brk: GSFxBreak
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	var args := OS.get_cmdline_user_args()
 	for i in range(args.size()):
 		if args[i] == "--shot" and i + 1 < args.size():
@@ -35,9 +35,9 @@ func _ready() -> void:
 	floor_mesh.mesh = bm
 	floor_mesh.position = Vector3(0, -0.1, 0)
 	add_child(floor_mesh)
-	var cfg := DotFxBreakConfig.new()
+	var cfg := GSFxBreakConfig.new()
 	cfg.headless = true
-	_brk = DotFxBreak.new()
+	_brk = GSFxBreak.new()
 	_brk.config = cfg
 	add_child(_brk)
 	var cam := Camera3D.new()
@@ -52,7 +52,7 @@ func _process(d: float) -> void:
 		_fired = true
 		_t = 0.0
 		var i := 0
-		for m: String in DotFxBreak.MATERIALS:
+		for m: String in GSFxBreak.MATERIALS:
 			_brk.burst(m, Vector3(-4.8 + i * 2.4, 0.6, 0), Vector3.UP, 1.5)
 			i += 1
 	elif _fired and _shot != "" and _t > _at:

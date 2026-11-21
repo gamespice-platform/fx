@@ -1,12 +1,12 @@
-class_name DotFxBlood
+class_name GSFxBlood
 extends Node
-## Blood on the surface behind a hit or under a victim, drawn through a [DotFxDecals] pool.
+## Blood on the surface behind a hit or under a victim, drawn through a [GSFxDecals] pool.
 ## Visual only: a game calls it from events it already gets, so nothing extra crosses the wire.
 
 ## Server splats accepted per second by [method splat_at].
 const SPLATS_PER_SECOND := 20
 
-var decals := DotFxDecals.new()
+var decals := GSFxDecals.new()
 ## Physics layers a splatter may land on: the game's rooms and props.
 var mask := 0xFFFFFFFF
 
@@ -22,7 +22,7 @@ func _init() -> void:
 
 ## Takes the player's `gore` and `fx_quality` from a GameSpice Settings manager (duck-typed: GameSpice FX does not depend on GameSpice Settings).
 func apply_settings(store: Object) -> void:
-	var cfg := DotFxDecalConfig.new()
+	var cfg := GSFxDecalConfig.new()
 	if store != null:
 		cfg.gore = store.get_bool(&"gore", true)
 		cfg.quality = store.get_int(&"fx_quality", 3)

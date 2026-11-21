@@ -43,7 +43,7 @@ func _test_placed_before_entering() -> void:
 func _test_beacon() -> void:
 	_section("A beacon pings once a period, and hides its column from its own player")
 
-	var b := DotFxBeacon.new()
+	var b := GSFxBeacon.new()
 	b.period = 0.5
 	b.colour = Color(0.2, 0.8, 0.3)
 	add_child(b)
@@ -71,7 +71,7 @@ func _test_beacon() -> void:
 
 	_check(b.top_level, "it is top level, placed where the player is drawn")
 
-	var ping := DotFxBeacon.synth_ping()
+	var ping := GSFxBeacon.synth_ping()
 	_check(ping != null and ping.data.size() > 1000, "with no stream a ping is synthesised (%d bytes)" % ping.data.size())
 
 	remove_child(b)
@@ -79,7 +79,7 @@ func _test_beacon() -> void:
 
 	# ping_enabled off: still ripples and counts, with no voice of its own to play, so a
 	# game that plays the ping through its own catalogue is not heard twice.
-	var quiet := DotFxBeacon.new()
+	var quiet := GSFxBeacon.new()
 	quiet.ping_enabled = false
 	add_child(quiet)
 	_check(quiet.advance(0.0) and quiet.get_node_or_null(^"Ping") == null,
@@ -93,7 +93,7 @@ func _test_beacon() -> void:
 	quiet.free()
 
 	# resize(): a live beacon changes size without being rebuilt, and keeps its phase.
-	var live := DotFxBeacon.new()
+	var live := GSFxBeacon.new()
 	add_child(live)
 	var _p := live.advance(0.0)
 	var _q := live.advance(0.3)
@@ -123,7 +123,7 @@ func _test_beam_and_thruster() -> void:
 
 	var holder := Node3D.new()
 	add_child(holder)
-	var held := DotFxBeam.hold(holder)
+	var held := GSFxBeam.hold(holder)
 	held.set_ends(Vector3.ZERO, Vector3(0.0, 0.0, 10.0))
 	_check(held.visible, "a held beam shows between two points")
 	_check(held.global_position.is_equal_approx(Vector3(0.0, 0.0, 5.0)), "centred between them")
@@ -131,10 +131,10 @@ func _test_beam_and_thruster() -> void:
 	held.set_ends(Vector3.ONE, Vector3.ONE)
 	_check(not held.visible, "a zero-length beam hides")
 
-	var shot := DotFxBeam.zap(holder, Vector3.ZERO, Vector3(0.0, 4.0, 0.0))
+	var shot := GSFxBeam.zap(holder, Vector3.ZERO, Vector3(0.0, 4.0, 0.0))
 	_check(shot != null and shot.get_parent() == holder, "a zap is a child of the parent given")
 
-	var jet := DotFxThruster.new()
+	var jet := GSFxThruster.new()
 	holder.add_child(jet)
 	jet.throttle = 3.0
 	_check(is_equal_approx(jet.throttle, 1.0), "throttle clamps to 1")
@@ -155,55 +155,55 @@ func _test_weather() -> void:
 		],
 		"density": 1.5, "wind": [1, 0, 0], "colour": "#ddeeff", "sound": "amb_wind",
 	}
-	var res := DotFxWeatherDef.parse(good)
+	var res := GSFxWeatherDef.parse(good)
 	_check(res.ok, "a good document parses")
-	var def: DotFxWeatherDef = res.value
+	var def: GSFxWeatherDef = res.value
 	_check(def.kind == &"snow" and def.volumes.size() == 2 and is_equal_approx(def.density, 1.5), "kind, volumes and density read back")
 	_check(def.volumes[1].position.is_equal_approx(Vector3(36, 0, -4)) and def.sound == &"amb_wind", "a centre and size is a box; the sound id is kept")
-	_check(DotFxWeatherDef.parse(def.to_dict()).ok, "to_dict parses again")
+	_check(GSFxWeatherDef.parse(def.to_dict()).ok, "to_dict parses again")
 
 	var bad := good.duplicate(true)
 	bad["kind"] = "hail"
-	_check(DotFxWeatherDef.parse(bad).code() == DotError.CODE_INVALID, "an unknown kind is invalid")
+	_check(GSFxWeatherDef.parse(bad).code() == GSError.CODE_INVALID, "an unknown kind is invalid")
 	bad = good.duplicate(true)
 	bad["volumes"] = [{"min": [0, 0, 0], "max": [0, 5, 5]}]
-	_check(not DotFxWeatherDef.parse(bad).ok, "a flat volume is refused")
+	_check(not GSFxWeatherDef.parse(bad).ok, "a flat volume is refused")
 	bad = good.duplicate(true)
 	bad["volums"] = []
-	_check(not DotFxWeatherDef.parse(bad).ok, "a misspelt key is refused, not read as everywhere")
+	_check(not GSFxWeatherDef.parse(bad).ok, "a misspelt key is refused, not read as everywhere")
 	bad = good.duplicate(true)
 	bad["density"] = 9
-	_check(not DotFxWeatherDef.parse(bad).ok, "density out of range is refused")
-	_check(DotFxWeatherDef.parse({"kind": "rain"}).value.volumes.is_empty(), "no volumes means everywhere")
+	_check(not GSFxWeatherDef.parse(bad).ok, "density out of range is refused")
+	_check(GSFxWeatherDef.parse({"kind": "rain"}).value.volumes.is_empty(), "no volumes means everywhere")
 
 	# Which volumes reach the shader.
 	var region := AABB(Vector3(5, 0, 0) - Vector3(14, 9, 14), Vector3(28, 18, 28))
-	var picked := DotFxWeather.select_volumes(def.volumes, region, Vector3(5, 0, 0))
+	var picked := GSFxWeather.select_volumes(def.volumes, region, Vector3(5, 0, 0))
 	_check(picked.size() == 1 and picked[0] == def.volumes[0], "only the volume the camera's box overlaps is picked")
-	_check(DotFxWeather.select_volumes(def.volumes, AABB(Vector3(100, 0, 100), Vector3(5, 5, 5)), Vector3(100, 0, 100)).is_empty(), "far from every volume, none is picked")
+	_check(GSFxWeather.select_volumes(def.volumes, AABB(Vector3(100, 0, 100), Vector3(5, 5, 5)), Vector3(100, 0, 100)).is_empty(), "far from every volume, none is picked")
 	var many: Array[AABB] = []
 	for i in range(40):
 		many.append(AABB(Vector3(i, 0, 0), Vector3.ONE))
-	var capped := DotFxWeather.select_volumes(many, AABB(Vector3(-5, -5, -5), Vector3(100, 10, 10)), Vector3.ZERO)
-	_check(capped.size() == DotFxWeather.MAX_ACTIVE and capped[0] == many[0], "past the shader's limit the nearest are kept")
-	_check(DotFxWeather.inside_any(def.volumes, Vector3(0, 5, 0)) and not DotFxWeather.inside_any(def.volumes, Vector3(20, 5, 0)), "inside_any says where the camera is")
+	var capped := GSFxWeather.select_volumes(many, AABB(Vector3(-5, -5, -5), Vector3(100, 10, 10)), Vector3.ZERO)
+	_check(capped.size() == GSFxWeather.MAX_ACTIVE and capped[0] == many[0], "past the shader's limit the nearest are kept")
+	_check(GSFxWeather.inside_any(def.volumes, Vector3(0, 5, 0)) and not GSFxWeather.inside_any(def.volumes, Vector3(20, 5, 0)), "inside_any says where the camera is")
 
 	# Quality and density.
-	var high := DotFxWeather.flakes_for(&"snow", 1.0, DotFxWeather.Quality.HIGH)
-	var low := DotFxWeather.flakes_for(&"snow", 1.0, DotFxWeather.Quality.LOW)
-	_check(DotFxWeather.flakes_for(&"snow", 1.0, DotFxWeather.Quality.OFF) == 0 and low > 0 and low < high, "off draws none, low fewer than high")
-	_check(DotFxWeather.flakes_for(&"rain", 4.0, DotFxWeather.Quality.HIGH) <= DotFxWeather.MAX_FLAKES, "flakes are capped")
+	var high := GSFxWeather.flakes_for(&"snow", 1.0, GSFxWeather.Quality.HIGH)
+	var low := GSFxWeather.flakes_for(&"snow", 1.0, GSFxWeather.Quality.LOW)
+	_check(GSFxWeather.flakes_for(&"snow", 1.0, GSFxWeather.Quality.OFF) == 0 and low > 0 and low < high, "off draws none, low fewer than high")
+	_check(GSFxWeather.flakes_for(&"rain", 4.0, GSFxWeather.Quality.HIGH) <= GSFxWeather.MAX_FLAKES, "flakes are capped")
 
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.weather_quality = 1
 	cfg.weather_density = 0.5
-	var w := DotFxWeather.new()
+	var w := GSFxWeather.new()
 	add_child(w)
 	w.apply_config(cfg)
-	_check(w.quality == DotFxWeather.Quality.LOW and is_equal_approx(w.density_scale, 0.5), "the config drives quality and density")
+	_check(w.quality == GSFxWeather.Quality.LOW and is_equal_approx(w.density_scale, 0.5), "the config drives quality and density")
 
 	# The sound hook, and the no-display rule. Headless here, so nothing is drawn.
-	_check(not DotFxWeather.can_render(), "this suite runs without a display, so weather cannot render")
+	_check(not GSFxWeather.can_render(), "this suite runs without a display, so weather cannot render")
 	_check(w.apply({"kind": "snow", "volumes": [{"min": [-10, 0, -10], "max": [10, 12, 10]}], "sound": "wind"}).ok, "apply accepts a document")
 	var events: Array = []
 	w.audible_changed.connect(func(id: StringName, inside_now: bool) -> void: events.append([id, inside_now]))
@@ -221,22 +221,22 @@ func _test_weather() -> void:
 
 func _test_muzzle_flash() -> void:
 	_section("muzzle flash: sizes, overrides, headless")
-	var S := DotMuzzleFlash.Size
-	_check(DotMuzzleFlash.size_for("pistol") == S.VERY_SMALL, "a pistol is very small")
-	_check(DotMuzzleFlash.size_for("Shotgun") == S.BIG, "a shotgun is big, case ignored")
-	_check(DotMuzzleFlash.size_for("rifle", {"muzzle_flash": "none"}) == S.NONE, "extra can switch it off")
-	_check(DotMuzzleFlash.size_for("pistol", {"muzzle_flash": "big"}) == S.BIG, "extra overrides the category")
-	_check(DotMuzzleFlash.size_for("rifle", {}, true) == S.NONE, "suppressed gives none")
-	_check(DotMuzzleFlash.size_for("harpoon") == S.SMALL, "an unknown category is small")
-	var f := DotMuzzleFlash.new()
+	var S := GSMuzzleFlash.Size
+	_check(GSMuzzleFlash.size_for("pistol") == S.VERY_SMALL, "a pistol is very small")
+	_check(GSMuzzleFlash.size_for("Shotgun") == S.BIG, "a shotgun is big, case ignored")
+	_check(GSMuzzleFlash.size_for("rifle", {"muzzle_flash": "none"}) == S.NONE, "extra can switch it off")
+	_check(GSMuzzleFlash.size_for("pistol", {"muzzle_flash": "big"}) == S.BIG, "extra overrides the category")
+	_check(GSMuzzleFlash.size_for("rifle", {}, true) == S.NONE, "suppressed gives none")
+	_check(GSMuzzleFlash.size_for("harpoon") == S.SMALL, "an unknown category is small")
+	var f := GSMuzzleFlash.new()
 	add_child(f)
 	_check(not f.fire() and f.get_child_count() == 0, "headless: nothing built, fire is skipped")
 	for s in [S.VERY_SMALL, S.SMALL, S.MEDIUM, S.BIG]:
-		for v in range(1, DotMuzzleFlash.VARIANTS + 1):
-			if not ResourceLoader.exists("%s%s%02d.tscn" % [DotMuzzleFlash.ROOT, DotMuzzleFlash.FOLDERS[s], v]):
+		for v in range(1, GSMuzzleFlash.VARIANTS + 1):
+			if not ResourceLoader.exists("%s%s%02d.tscn" % [GSMuzzleFlash.ROOT, GSMuzzleFlash.FOLDERS[s], v]):
 				_check(false, "missing flash scene %d/%d" % [s, v])
 	_check(true, "all 24 flash scenes exist")
-	_check(DotMuzzleFlash.prewarm(f) == null, "headless: prewarm draws nothing")
+	_check(GSMuzzleFlash.prewarm(f) == null, "headless: prewarm draws nothing")
 	_check(f.is_ready(), "headless: a flash that can never draw counts as ready")
 	_check(not f.is_processing(), "headless: it does not tick to build a pool")
 	f.queue_free()
@@ -244,9 +244,9 @@ func _test_muzzle_flash() -> void:
 
 func _test_muzzle_flash_lifetime() -> void:
 	_section("muzzle flash: short lifetime, reset on every shot")
-	DotMuzzleFlash.force_available = true
-	var f := DotMuzzleFlash.new()
-	f.size = DotMuzzleFlash.Size.SMALL
+	GSMuzzleFlash.force_available = true
+	var f := GSMuzzleFlash.new()
+	f.size = GSMuzzleFlash.Size.SMALL
 	add_child(f)
 	_check(f.fire(), "a forced-available flash fires")
 	var shot := Time.get_ticks_msec()
@@ -275,35 +275,35 @@ func _test_muzzle_flash_lifetime() -> void:
 	# Let the lights of the shots above run out, so a scene load inside the next fire() cannot expire one mid-check.
 	await _wait_wall_ms(Time.get_ticks_msec(), 100)
 
-	var dark := DotMuzzleFlash.new()
-	dark.size = DotMuzzleFlash.Size.SMALL
+	var dark := GSMuzzleFlash.new()
+	dark.size = GSMuzzleFlash.Size.SMALL
 	dark.light = false
 	add_child(dark)
-	var before := DotFxLightBudget.live()
+	var before := GSFxLightBudget.live()
 	dark.fire()
 	var dark_lit := false
 	for n in dark.get_children():
 		dark_lit = dark_lit or bool(n.get("light_enable"))
 	_check(not dark_lit, "light = false: no instance carries a light")
-	_check(DotFxLightBudget.live() == before, "and it takes nothing from the light cap")
+	_check(GSFxLightBudget.live() == before, "and it takes nothing from the light cap")
 	dark.free()
 
-	DotMuzzleFlash.force_available = false
+	GSMuzzleFlash.force_available = false
 
 
 ## 32 bots, 100 shots: nodes built and ms per shot with the old three-per-flash pool against the world pool, plus the distance cull.
 func _test_muzzle_flash_bench() -> void:
 	_section("muzzle flash bench: 32 bot muzzles, 100 shots")
-	DotMuzzleFlash.force_available = true
+	GSMuzzleFlash.force_available = true
 	var report := {}
 	for pool: int in [3, 1]:
-		var cfg := DotMuzzleFlashConfig.new()
+		var cfg := GSMuzzleFlashConfig.new()
 		cfg.world_pool = pool
 		var before := Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
-		var flashes: Array[DotMuzzleFlash] = []
+		var flashes: Array[GSMuzzleFlash] = []
 		for i in 32:
-			var f := DotMuzzleFlash.new()
-			f.size = DotMuzzleFlash.Size.SMALL
+			var f := GSMuzzleFlash.new()
+			f.size = GSMuzzleFlash.Size.SMALL
 			f.config = cfg
 			add_child(f)
 			flashes.append(f)
@@ -316,14 +316,14 @@ func _test_muzzle_flash_bench() -> void:
 		print("[bench] world_pool=%d: %d nodes for 32 muzzles after 100 shots, %.3f ms per shot" % [pool, made, us / 1000.0 / 100.0])
 		for f in flashes:
 			f.free()
-		DotFxLightBudget.reset()
+		GSFxLightBudget.reset()
 	_check(int(report[1]) < int(report[3]), "a world pool of one builds fewer nodes (%d < %d)" % [report[1], report[3]])
 	# Cull and light distance: a camera at the origin, a flash 200 m and 50 m away.
 	var cam := Camera3D.new()
 	add_child(cam)
 	cam.make_current()
-	var far := DotMuzzleFlash.new()
-	far.size = DotMuzzleFlash.Size.SMALL
+	var far := GSMuzzleFlash.new()
+	far.size = GSMuzzleFlash.Size.SMALL
 	add_child(far)
 	far.position = Vector3(0, 0, -200)
 	_check(not far.fire() and far.culled == 1, "a bot flash 200 m away is not drawn")
@@ -338,7 +338,7 @@ func _test_muzzle_flash_bench() -> void:
 	_check(far.fire(), "the first-person gun is never culled")
 	far.free()
 	cam.free()
-	DotMuzzleFlash.force_available = false
+	GSMuzzleFlash.force_available = false
 
 
 func _solid(body: PhysicsBody3D, size: Vector3, at: Vector3) -> void:
@@ -351,7 +351,7 @@ func _solid(body: PhysicsBody3D, size: Vector3, at: Vector3) -> void:
 	add_child(body)
 
 
-func _decal_from_above(m: DotFxManager, x: float, y: float) -> Node:
+func _decal_from_above(m: GSFxManager, x: float, y: float) -> Node:
 	return m.spawn_decal(&"bullet_hole", Transform3D(Basis.looking_at(Vector3.DOWN, Vector3.RIGHT), Vector3(x, y, 0)))
 
 
@@ -367,7 +367,7 @@ func _test_decal_surfaces() -> void:
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 
-	var cfg := DotFxConfig.new()
+	var cfg := GSFxConfig.new()
 	cfg.quality = 3
 	cfg.frame_budget = 0
 	var m := _manager(cfg)
@@ -428,11 +428,11 @@ func _test_decal_surfaces() -> void:
 
 func _test_muzzle_flash_follows() -> void:
 	_section("muzzle flash follows its weapon and does not outlive its shot")
-	DotMuzzleFlash.force_available = true
+	GSMuzzleFlash.force_available = true
 	var muzzle := Node3D.new()
 	add_child(muzzle)
-	var f := DotMuzzleFlash.new()
-	f.size = DotMuzzleFlash.Size.SMALL
+	var f := GSMuzzleFlash.new()
+	f.size = GSMuzzleFlash.Size.SMALL
 	muzzle.add_child(f)
 	f.fire()
 	var shot := Time.get_ticks_msec()
@@ -446,18 +446,18 @@ func _test_muzzle_flash_follows() -> void:
 	await _wait_wall_ms(shot, 150)
 	_check(not f.is_showing(), "and 150 ms after the shot nothing of it is left")
 	muzzle.queue_free()
-	DotMuzzleFlash.force_available = false
+	GSMuzzleFlash.force_available = false
 
 
 func _test_muzzle_flash_materials_not_shared() -> void:
 	_section("muzzle flashes own their materials: one flash's fade does not leak into another")
-	DotMuzzleFlash.force_available = true
-	var a := DotMuzzleFlash.new()
-	a.size = DotMuzzleFlash.Size.SMALL
+	GSMuzzleFlash.force_available = true
+	var a := GSMuzzleFlash.new()
+	a.size = GSMuzzleFlash.Size.SMALL
 	a.variant = 1
 	a.first_person = true
-	var b := DotMuzzleFlash.new()
-	b.size = DotMuzzleFlash.Size.SMALL
+	var b := GSMuzzleFlash.new()
+	b.size = GSMuzzleFlash.Size.SMALL
 	b.variant = 1
 	b.first_person = false
 	add_child(a)
@@ -478,7 +478,7 @@ func _test_muzzle_flash_materials_not_shared() -> void:
 		_check(before == _first_mat(na), "later writes reuse the owned copy (no new allocation)")
 	a.queue_free()
 	b.queue_free()
-	DotMuzzleFlash.force_available = false
+	GSMuzzleFlash.force_available = false
 
 
 ## The flash noise is baked to PNG files (tools/bake_muzzle_noise.gd): a NoiseTexture2D builds its first image on the
@@ -539,17 +539,17 @@ func _first_mat(vfx: Node3D) -> ShaderMaterial:
 
 func _test_light_cap_and_pools() -> void:
 	_section("light cap and node pools")
-	var cfg := DotFxPoolConfig.new()
+	var cfg := GSFxPoolConfig.new()
 	cfg.max_lights = -1
 	var cap := cfg.effective_max_lights()
-	var expect := 2 if DotPlatform.is_web() else (3 if DotPlatform.is_mobile() else 8)
+	var expect := 2 if GSPlatform.is_web() else (3 if GSPlatform.is_mobile() else 8)
 	_check(cap == expect, "default cap follows the platform (%d)" % cap)
 	cfg.max_lights = 5
 	_check(cfg.effective_max_lights() == 5, "an explicit cap wins")
 
-	DotFxLightBudget.config.max_lights = 2
-	DotFxLightBudget.reset()
-	var pool := DotFxLightPool.new()
+	GSFxLightBudget.config.max_lights = 2
+	GSFxLightBudget.reset()
+	var pool := GSFxLightPool.new()
 	add_child(pool)
 	pool.prewarm(3, 0)
 	_check(pool.built() == 3 and pool.idle() == 3, "prewarm builds three idle lights")
@@ -557,21 +557,21 @@ func _test_light_cap_and_pools() -> void:
 	var b := pool.flash(Vector3.ONE, Color.WHITE, 2.0, 4.0, 0.1)
 	var c := pool.flash(Vector3.ONE, Color.WHITE, 2.0, 4.0, 0.1)
 	_check(a != null and b != null and c == null, "the third light is refused at a cap of two")
-	_check(pool.built() == 3 and DotFxLightBudget.live() == 2, "no node was built beyond the prewarm")
+	_check(pool.built() == 3 and GSFxLightBudget.live() == 2, "no node was built beyond the prewarm")
 	await get_tree().create_timer(0.2).timeout
 	_check(pool.idle() == 3 and not a.visible, "lights return to the pool when done")
 	var d := pool.flash(Vector3.ZERO, Color.RED, 1.0, 3.0, 0.1)
 	_check(d == a or d == b or pool.built() == 3, "a later flash reuses a pooled light")
 	_check(pool.built() == 3, "still three lights built")
 
-	DotFxLightBudget.config.max_lights = 0
-	DotFxLightBudget.reset()
+	GSFxLightBudget.config.max_lights = 0
+	GSFxLightBudget.reset()
 	_check(pool.flash(Vector3.ZERO, Color.WHITE, 1.0, 3.0, 0.1) == null, "a cap of zero lights nothing")
-	DotFxLightBudget.config.max_lights = -1
-	DotFxLightBudget.reset()
+	GSFxLightBudget.config.max_lights = -1
+	GSFxLightBudget.reset()
 	pool.queue_free()
 
-	var meshes := DotFxMeshPool.new()
+	var meshes := GSFxMeshPool.new()
 	add_child(meshes)
 	var quad := QuadMesh.new()
 	await meshes.prewarm(quad, null, 2, 0)
@@ -584,9 +584,9 @@ func _test_light_cap_and_pools() -> void:
 	_check(meshes.idle() == 1 and not m1.visible, "release hides and pools once, even when called twice")
 	var m3 := meshes.acquire(quad, Transform3D.IDENTITY)
 	_check(m3 == m1 and meshes.built() == 2, "the released instance is the one reused")
-	DotFxMeshPool.max_idle = 0
+	GSFxMeshPool.max_idle = 0
 	meshes.release(m3)
 	_check(meshes.idle() == 0 and meshes.built() == 1 and m3.is_queued_for_deletion(),
 		"max_idle frees a release past the cap instead of pooling it")
-	DotFxMeshPool.max_idle = -1
+	GSFxMeshPool.max_idle = -1
 	meshes.queue_free()

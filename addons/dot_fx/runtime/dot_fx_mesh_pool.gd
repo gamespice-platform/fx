@@ -1,4 +1,4 @@
-class_name DotFxMeshPool
+class_name GSFxMeshPool
 extends Node3D
 
 ## Reused MeshInstance3D nodes for impact marks and flashes, so none is built or freed mid-match. Place it yourself; no autoload.
@@ -12,9 +12,9 @@ var _free: Array[MeshInstance3D] = []
 var _all: Array[MeshInstance3D] = []
 
 
-## Builds [param count] hidden instances (default [member DotFxPoolConfig.prewarm_meshes]) of [param mesh] and draws them for [param frames] frames so the shader compiles under a loading cover.
+## Builds [param count] hidden instances (default [member GSFxPoolConfig.prewarm_meshes]) of [param mesh] and draws them for [param frames] frames so the shader compiles under a loading cover.
 func prewarm(mesh: Mesh, material: Material = null, count: int = -1, frames: int = 2) -> void:
-	var n := DotFxLightBudget.config.prewarm_meshes if count < 0 else count
+	var n := GSFxLightBudget.config.prewarm_meshes if count < 0 else count
 	for i in n:
 		var m := _make()
 		m.mesh = mesh

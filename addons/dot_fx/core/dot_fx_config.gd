@@ -1,6 +1,6 @@
 @tool
-class_name DotFxConfig
-extends DotConfig
+class_name GSFxConfig
+extends GSConfig
 
 ## What a player and an operator get to say about effects.
 ##
@@ -35,13 +35,13 @@ extends DotConfig
 ## testing and fatal at minute forty.
 @export_range(0, 4096, 1) var max_decals: int = 256
 
-## Whether a shot that passed through a wall leaves a hole on both faces, and a ricochet a mark (`cl_penetration_decals`; see [method DotFxManager.spawn_penetration_decals]).
+## Whether a shot that passed through a wall leaves a hole on both faces, and a ricochet a mark (`cl_penetration_decals`; see [method GSFxManager.spawn_penetration_decals]).
 @export var penetration_decals: bool = true
 
 ## How many spawned effects may exist at once, across every id.
 @export_range(1, 4096, 1) var max_instances: int = 256
 
-## Falling weather: 0 off, 1 low (a third of the flakes), 2 high. Read by [DotFxWeather].
+## Falling weather: 0 off, 1 low (a third of the flakes), 2 high. Read by [GSFxWeather].
 @export_range(0, 2, 1) var weather_quality: int = 2
 
 ## Scales the thickness of falling weather, 0 to 2.
@@ -92,7 +92,7 @@ func cli_prefix() -> String:
 	return "--fx-"
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if quality < 0 or quality > 3:
-		return DotResult.fail(DotError.CODE_INVALID, "quality is a tier from 0 to 3")
-	return DotResult.success(null)
+		return GSResult.fail(GSError.CODE_INVALID, "quality is a tier from 0 to 3")
+	return GSResult.success(null)

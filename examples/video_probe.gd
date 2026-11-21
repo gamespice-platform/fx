@@ -1,6 +1,6 @@
 extends Node3D
 
-## Flips every video setting [DotFxRenderQuality] and [DotFxGraphics] apply, through a settings store, and checks
+## Flips every video setting [GSFxRenderQuality] and [GSFxGraphics] apply, through a settings store, and checks
 ## what each one changed. Headless it checks the engine state only (the suite); on a real GPU it also renders a
 ## frame per setting and fails when the picture did not change (the "does this setting do anything" audit).
 ##
@@ -10,7 +10,7 @@ extends Node3D
 const MIN_DIFF := 0.002  # share of pixels that must change for a setting to count as visible
 
 var _store := _Store.new()
-var _rq: DotFxRenderQuality
+var _rq: GSFxRenderQuality
 var _out := ""
 var _gpu := false
 var _passed := 0
@@ -36,7 +36,7 @@ func _ready() -> void:
 	if _out != "":
 		DirAccess.make_dir_recursive_absolute(_out)
 	_build_world()
-	_rq = DotFxRenderQuality.new()
+	_rq = GSFxRenderQuality.new()
 	add_child(_rq)
 	_rq.follow(_store)
 	await _frames(8)
@@ -51,9 +51,9 @@ func _ready() -> void:
 func _run() -> void:
 	var g := _rq.graphics
 	_check(g != null, "follow() makes the graphics node")
-	_check(_prop.get_meta(DotFxGraphics.META, {}).get("prop", false), "a small mesh is a prop")
-	_check(not _big.get_meta(DotFxGraphics.META, {}).get("prop", true), "a big mesh is not a prop")
-	_check(not _actor_mesh.get_meta(DotFxGraphics.META, {}).get("prop", true), "a mesh on a character is not a prop")
+	_check(_prop.get_meta(GSFxGraphics.META, {}).get("prop", false), "a small mesh is a prop")
+	_check(not _big.get_meta(GSFxGraphics.META, {}).get("prop", true), "a big mesh is not a prop")
+	_check(not _actor_mesh.get_meta(GSFxGraphics.META, {}).get("prop", true), "a mesh on a character is not a prop")
 	_check((_prop.material_override as BaseMaterial3D).texture_filter == BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC,
 		"trilinear materials become anisotropic so the aniso setting reaches them")
 	var base := await _settled_base()
@@ -66,16 +66,16 @@ func _run() -> void:
 	await _case(&"lod_bias", 0.25, func() -> bool: return is_equal_approx(get_viewport().mesh_lod_threshold, 4.0), base, false)
 	await _case(&"particle_quality", 0, func() -> bool: return is_equal_approx(_parts.amount_ratio, 0.25) and _cpu_parts.amount == 50, base, false)
 	await _case(&"detail_density", 0.3, func() -> bool: return _grass.multimesh.visible_instance_count == int(_grass.multimesh.instance_count * 0.3), base, true)
-	if DotFxGraphics.supports_ssao():
+	if GSFxGraphics.supports_ssao():
 		await _case(&"ambient_occlusion", 0, func() -> bool: return not _env.ssao_enabled, base, false)
 		await _case(&"ambient_occlusion", 2, func() -> bool: return _env.ssao_enabled, base, false)
 	await _case(&"glow", false, func() -> bool: return not _env.glow_enabled, base, true)
 	await _case(&"reflection_quality", 0, func() -> bool: return not _probe.visible, base, false)
-	if DotFxGraphics.supports_ssr():
+	if GSFxGraphics.supports_ssr():
 		await _case(&"reflection_quality", 3, func() -> bool: return _env.ssr_enabled, base, false)
 	await _case(&"brightness", 1.4, func() -> bool: return g._brightness_layer != null, base, true)
 	await _case(&"brightness", 0.7, func() -> bool: return g._brightness_layer != null, base, true)
-	if DotFxGraphics.supports_mip_bias():
+	if GSFxGraphics.supports_mip_bias():
 		await _case(&"texture_quality", 0, func() -> bool: return is_equal_approx(get_viewport().texture_mipmap_bias, 1.5), base, true)
 	await _case(&"render_scale", 0.5, func() -> bool: return is_equal_approx(get_viewport().scaling_3d_scale, 0.5), base, true)
 	# aniso against off: the floor runs away from the camera at a grazing angle. Glow off for both AA cases:
@@ -97,7 +97,7 @@ func _run() -> void:
 	for i in 6:
 		g.step_dynamic(30.0)
 	var low := get_viewport().scaling_3d_scale
-	_check(low < 0.999 and low >= DotFxGraphics.DYN_FLOOR - 0.001, "dynamic resolution lowers the scale on a slow frame rate (%.2f)" % low)
+	_check(low < 0.999 and low >= GSFxGraphics.DYN_FLOOR - 0.001, "dynamic resolution lowers the scale on a slow frame rate (%.2f)" % low)
 	for i in 30:
 		g.step_dynamic(30.0)
 	_check(g.dyn_prop_share < 1.0, "dynamic resolution at its floor shortens the prop distance")
@@ -141,8 +141,8 @@ func _case(key: StringName, value: Variant, test: Callable, base: Image, visible
 
 
 static func _default(key: StringName) -> Variant:
-	if DotFxGraphics.DEFAULTS.has(key):
-		return DotFxGraphics.DEFAULTS[key]
+	if GSFxGraphics.DEFAULTS.has(key):
+		return GSFxGraphics.DEFAULTS[key]
 	return {&"aniso": -1, &"aa": 0, &"render_scale": 1.0, &"mip_bias": 0.0, &"sharpness": 0.2}.get(key)
 
 

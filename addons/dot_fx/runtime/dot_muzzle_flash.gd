@@ -1,4 +1,4 @@
-class_name DotMuzzleFlash
+class_name GSMuzzleFlash
 extends Node3D
 
 ## A pooled muzzle flash from Binbun's CC0 pack. Parent it to a weapon's muzzle point (view model or world model, facing -Z) and call [method fire] per shot; it builds its instances once and never allocates after.
@@ -20,14 +20,14 @@ const CATEGORY_SIZE := {
 	"rifle": Size.MEDIUM, "ar": Size.MEDIUM, "carbine": Size.SMALL, "lmg": Size.MEDIUM,
 	"shotgun": Size.BIG, "sniper": Size.BIG, "dmr": Size.MEDIUM, "magnum": Size.MEDIUM,
 }
-## How long the art's own animation runs; the flash is sped up to fit [member DotMuzzleFlashConfig.lifetime].
+## How long the art's own animation runs; the flash is sped up to fit [member GSMuzzleFlashConfig.lifetime].
 const ART_SECONDS := 0.2
 const NAMES := {"none": Size.NONE, "very_small": Size.VERY_SMALL, "small": Size.SMALL, "medium": Size.MEDIUM, "big": Size.BIG}
 
 ## Shown at the muzzle of the first-person view model: fades near the camera.
 @export var first_person: bool = false
 @export var size: Size = Size.SMALL
-@export var config: DotMuzzleFlashConfig = null
+@export var config: GSMuzzleFlashConfig = null
 
 ## False gives this flash no light on any tier and takes nothing from the shared light cap, for a game that lights its own shots.
 @export var light: bool = true
@@ -67,7 +67,7 @@ static func size_for(category: String, extra: Dictionary = {}, suppressed: bool 
 
 ## Whether flashes can draw here at all: not a headless server.
 static func available() -> bool:
-	return force_available or not DotPlatform.is_headless()
+	return force_available or not GSPlatform.is_headless()
 
 
 ## Play one flash. Returns false when it was skipped (off, headless, size none).
@@ -86,7 +86,7 @@ func fire() -> bool:
 	_next = (_next + 1) % _pool.size()
 	# Over the shared light cap the flash still draws, unlit.
 	var near_enough := first_person or config.light_distance <= 0.0 or far <= config.light_distance
-	node.set("light_enable", light and near_enough and config.quality >= 2 and config.light_scale > 0.0 and DotFxLightBudget.try_take(config.lifetime))
+	node.set("light_enable", light and near_enough and config.quality >= 2 and config.light_scale > 0.0 and GSFxLightBudget.try_take(config.lifetime))
 	node.visible = true
 	node.call("play")
 	set_process(true)
@@ -101,7 +101,7 @@ func _camera_distance() -> float:
 	return cam.global_position.distance_to(global_position) if cam != null else 0.0
 
 
-## Instances this flash keeps: the full pool on the first-person gun, [member DotMuzzleFlashConfig.world_pool] elsewhere.
+## Instances this flash keeps: the full pool on the first-person gun, [member GSMuzzleFlashConfig.world_pool] elsewhere.
 func pool_target() -> int:
 	return POOL if first_person else clampi(config.world_pool if config != null else 1, 1, POOL)
 
@@ -170,7 +170,7 @@ func _prepare() -> bool:
 		return _chosen != null
 	_scene_ready = true
 	if config == null:
-		config = DotMuzzleFlashConfig.new()
+		config = GSMuzzleFlashConfig.new()
 	if not available() or config.quality <= 0 or size == Size.NONE:
 		return false
 	var s: int = mini(int(size), config.max_size)
@@ -233,7 +233,7 @@ static func pin_scenes(budget_ms: int) -> bool:
 
 
 ## Pins every flash scene (see [method pin_scenes]), then draws one flash of each size once under [param parent] (put it in view, under the loading cover), so the first shot of a match costs no scene load, shader compile or light. Returns the rig; free it a few frames later. Null when flashes cannot draw here.
-static func prewarm(parent: Node3D, config: DotMuzzleFlashConfig = null) -> Node3D:
+static func prewarm(parent: Node3D, config: GSMuzzleFlashConfig = null) -> Node3D:
 	if parent == null or not available():
 		return null
 	var rig := Node3D.new()
@@ -241,7 +241,7 @@ static func prewarm(parent: Node3D, config: DotMuzzleFlashConfig = null) -> Node
 	parent.add_child(rig)
 	pin_scenes(1 << 30)
 	for s: int in FOLDERS:
-		var flash := DotMuzzleFlash.new()
+		var flash := GSMuzzleFlash.new()
 		flash.size = s as Size
 		flash.variant = 1
 		flash.config = config
