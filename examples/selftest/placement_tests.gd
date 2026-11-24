@@ -590,3 +590,18 @@ func _test_light_cap_and_pools() -> void:
 		"max_idle frees a release past the cap instead of pooling it")
 	GSFxMeshPool.max_idle = -1
 	meshes.queue_free()
+
+
+func _test_graphics_tracking_pruned() -> void:
+	_section("Freed meshes do not pile up as weak refs in the graphics tracker")
+
+	var g := GSFxGraphics.new()
+	add_child(g)
+	for i in 3000:
+		var mi := MeshInstance3D.new()
+		add_child(mi)
+		g._track(mi)
+		mi.free()
+	var tracked := (g._tracked as Array).size()
+	_check(tracked < 1100, "3000 tracked then freed meshes leave under 1100 refs (%d)" % tracked)
+	g.queue_free()

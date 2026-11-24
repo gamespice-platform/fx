@@ -11,8 +11,8 @@ extends "res://examples/selftest/placement_tests.gd"
 ## godot --headless --path . res://examples/fx_selftest.tscn
 ## [/codeblock]
 
-const SECTIONS := 21
-const CHECKS := 197
+const SECTIONS := 22
+const CHECKS := 198
 
 
 func _ready() -> void:
@@ -45,6 +45,7 @@ func _run() -> void:
 	await _test_muzzle_noise_baked()
 	await _test_light_cap_and_pools()
 	_test_penetration_decals()
+	_test_graphics_tracking_pruned()
 
 	_line("")
 	_line("%d sections, %d passed, %d failed" % [_section_count, _passed, _failed])

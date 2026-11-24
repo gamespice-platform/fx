@@ -74,6 +74,8 @@ var dyn_prop_share: float = 1.0
 var _store: Object
 var _pending: Array = []
 var _tracked: Array = []
+# Size of _tracked that triggers the next sweep of dead entries (twice what survived the last one).
+var _sweep_at := 256
 var _shadow_saved := {}
 # describe()'s dictionary, refilled in place (apply runs from _process under dynamic resolution).
 var _state := {}
@@ -226,8 +228,21 @@ func _track(n: Node) -> void:
 	if n.has_meta(META):
 		return
 	n.set_meta(META, _capture(n))
+	if _tracked.size() >= _sweep_at:
+		_sweep()
 	_tracked.append(weakref(n))
 	_apply_node(n)
+
+
+## Drops the weak refs of freed nodes. Apply alone pruned them, and it runs on a setting change, so a
+## shooter's tracers and decals (each a tracked mesh, each freed) left one WeakRef apiece, forever.
+func _sweep() -> void:
+	var live: Array = []
+	for w: WeakRef in _tracked:
+		if is_instance_valid(w.get_ref()):
+			live.append(w)
+	_tracked = live
+	_sweep_at = maxi(256, live.size() * 2)
 
 
 ## What the node had before this touched it.
