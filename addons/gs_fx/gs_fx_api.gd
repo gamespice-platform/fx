@@ -17,5 +17,6 @@ extends RefCounted
 # 9: GSFxBreak and GSFxBreakConfig: break particles and a sound keyed by material.
 # 10: GSFxPoolConfig, GSFxLightBudget, GSFxLightPool and GSFxMeshPool: pooled impact nodes and a dynamic-light cap.
 # 11: GSFxManager.surface_at() and spawn_on_surface(): the surface query decals use, public, and impact effects that follow a moving body.
-const LEVEL := 11
+# 12: GSFxBlood.splat_burst(): a fan of blood rays for a thrown limb or gib.
+const LEVEL := 12
 const OLDEST := 1
