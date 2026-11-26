@@ -66,6 +66,26 @@ func splat_ray(origin: Vector3, direction: Vector3, reach: float, size: float = 
 	return decals.splatter(hit["position"], hit["normal"], size)
 
 
+## A spray of blood from [param origin] along [param direction]: [param count] rays fanned inside a cone of [param spread] radians, each drawing a splatter where it lands (walls, floor, ceiling). It is how a severed limb or a gib paints the room the way it was thrown. Returns the splatters drawn. [param count] 0 or less draws none; the decal ring bounds the total.
+func splat_burst(origin: Vector3, direction: Vector3, count: int = 4, spread: float = 0.6, reach: float = 3.5, size: float = 1.0) -> Array[Node3D]:
+	var drawn: Array[Node3D] = []
+	if count <= 0 or direction.length() < 0.001:
+		return drawn
+	var axis := direction.normalized()
+	var side := axis.cross(Vector3.UP if absf(axis.y) < 0.95 else Vector3.RIGHT).normalized()
+	var up := axis.cross(side)
+	for i in count:
+		# An even fan with a golden-angle twist, so a small count still covers the cone without a pattern.
+		var ring := float(i) / float(maxi(count - 1, 1))
+		var turn := float(i) * 2.399963
+		var tilt := spread * sqrt(ring)
+		var ray := (axis * cos(tilt) + (side * cos(turn) + up * sin(turn)) * sin(tilt)).normalized()
+		var mark := splat_ray(origin, ray, reach, size)
+		if mark != null:
+			drawn.append(mark)
+	return drawn
+
+
 ## A server's word that blood landed at [param point] facing [param normal]: only near the camera, at most [constant SPLATS_PER_SECOND] a second.
 func splat_at(point: Vector3, normal: Vector3, within: float = 60.0) -> Node3D:
 	var camera := get_viewport().get_camera_3d() if get_viewport() != null else null

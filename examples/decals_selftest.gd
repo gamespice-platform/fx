@@ -4,7 +4,7 @@ extends Node
 ## Looks are checked with decals_demo.tscn.
 
 const SECTIONS := 7
-const CHECKS := 74
+const CHECKS := 76
 
 var _passed := 0
 var _failed := 0
@@ -241,6 +241,9 @@ func _blood_node() -> void:
 	_check(b.splat_below(Vector3(0, -6, 0)) == null, "no surface in reach, none drawn")
 	_check(b.splat_behind(Vector3(0, 3, 0), Vector3(0, 1.5, 0)) != null, "behind a hit: the surface beyond the point")
 	_check(b.splat_behind(Vector3.ONE, Vector3.ONE) == null, "a zero-length shot draws none")
+	var burst := b.splat_burst(Vector3(0, 1, 0), Vector3.DOWN, 5, 0.3)
+	_check(burst.size() == 5, "a burst fanned down paints the floor once per ray")
+	_check(b.splat_burst(Vector3(0, 1, 0), Vector3.DOWN, 0).is_empty() and b.splat_burst(Vector3.ZERO, Vector3.ZERO, 4).is_empty(), "no rays or no direction draws none")
 	b.mask = 0
 	_check(b.splat_below(Vector3.ZERO) == null, "a mask that excludes the floor draws none")
 	b.mask = 0xFFFFFFFF
