@@ -2,7 +2,7 @@
 
 Visual effects for Godot 4 games: muzzle flashes, decals and blood, camera shake, screen flashes, snow and rain, beacons and break effects. You describe effects as data, and gs-fx spawns them, reuses them, and drops them when the frame gets too busy. It is one addon of TMC's open source [**GameSpice**](https://gamespice.net) collection (MIT licence) and depends only on [GameSpice Core](https://github.com/gamespice-platform/core).
 
-> Built with Claude Code. Every addon has a headless test suite and the suites pass, but little of this has met real players yet. Please report rough edges.
+> gs-fx is a [GameSpice](https://gamespice.net) addon, MIT licensed and built with Claude Code. The `*_selftest` scenes in `examples/` run headless. The games in [Zee's Games](https://zeesgames.com) are built on the GameSpice addons and run on live servers, so this one is exercised in real matches and not only in tests.
 
 ## Install
 
@@ -156,6 +156,27 @@ Only `kind` (`snow` or `rain`) is required. `volumes` are world-space boxes give
 ## Examples
 
 Open these scenes from `examples/`: `weather_demo`, `decals_demo`, `muzzle_demo`, `break_demo`, `goo_demo`, `surface_demo`. The `*_selftest` scenes run headless. `tools/screenshot.sh shots/m.png muzzle` (or `break`) takes a screenshot.
+
+## Used by
+
+It is vendored in these games:
+
+- [Fatal Contact](https://zeesgames.com/fatal-contact)
+- [Airdrift](https://zeesgames.com/airdrift)
+- [Playlot](https://zeesgames.com/playlot)
+- [Hungario](https://zeesgames.com/hungario)
+- [Buses From Hell](https://zeesgames.com/buses-from-hell)
+- [Smash Copter](https://zeesgames.com/smash-copter)
+- [Zombie Zone](https://zeesgames.com/zombie-zone)
+- [Hide n Seek](https://zeesgames.com/hide-n-seek)
+- [Prop Hunt](https://zeesgames.com/prop-hunt)
+- [Murder Mystery](https://zeesgames.com/murder-mystery)
+- [Deathrun](https://zeesgames.com/deathrun)
+- [Wipeout](https://zeesgames.com/wipeout)
+- [Dangerous Delivery](https://zeesgames.com/dangerous-delivery)
+- [Look At Me](https://zeesgames.com/look-at-me)
+
+The whole collection is at [zeesgames.com](https://zeesgames.com).
 
 ## Credits
 
